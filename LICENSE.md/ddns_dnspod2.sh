@@ -7,6 +7,29 @@ host=ddns
 Email=abc@abc.com
 CHECKURL="http://icanhazip.com/"
 
+IPCHEK(){
+	IP_CONF='ip.conf'
+	current_ip=$URLIP
+
+
+	if [ ! -d $IP_CONF ]
+	then
+		touch $IP_CONF
+	fi
+
+	conf_ip=$(cat $IP_CONF)
+
+	if [ "$conf_ip" != "$current_ip" ] || [ $UPDATE == 1 ]
+	then
+		curl -k https://tanst.net/script/mail.php -X POST -d "event=RECORD_IP($final_IP),CURRENT_IP:$current_ip changed&name=$host.$domain&email=$Email"
+		echo "$current_ip">$IP_CONF
+		echo "Email is sent successfully."
+	else
+		echo"IP NO CHANGED"
+	fi
+	exit
+}
+
 date
 UPDATE=0
 if (echo $CHECKURL |grep -q "://")
@@ -25,6 +48,7 @@ then
 		if [ "$DNSIP" == "$URLIP" ]
 		then
 			echo "IP SAME IN DNS,SKIP UPDATE."
+			IPCHEK
 			exit
 		fi
 fi
@@ -39,6 +63,7 @@ then
 		if [ "$record_ip" == "$URLIP" ]
 		then
 			echo "IP SAME IN API,SKIP UPDATE."
+			IPCHEK
 			exit
 		fi
 	record_id=$(echo ${Record#*records}|cut -d'"' -f9)
@@ -49,27 +74,7 @@ then
 	final_IP=$(echo $ddns|grep -Eo "$IPREX"|tail -n1)
 	echo "DDNS upadte result:$ddns_result $final_IP"
 	UPDATE=1
+	IPCHEK
 	else echo -n Get $host.$domain error :
 	echo $(echo ${Record#*message\"})|cut -d'"' -f2
-fi
-
-
-# IP CHECK
-
-IP_CONF='ip.conf'
-current_ip=$URLIP
-
-
-if [ ! -d $IP_CONF ]
-then
-    touch $IP_CONF
-fi
-
-conf_ip=$(cat $IP_CONF)
-
-if [ "$conf_ip" != "$current_ip" ] || [ $UPDATE == 1 ]
-then
-	curl -k https://www.xdty.org/mail/mail.php -X POST -d "event=RECORD_IP($final_IP),CURRENT_IP:$current_ip changed&name=$host.$domain&email=$Email"
-	echo "$current_ip">$IP_CONF
-	echo "Email is sent successfully."
 fi
