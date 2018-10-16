@@ -38,7 +38,7 @@ dnspod_send_email(){
 
 ## DNS_IP = CURRENT_IP
 	IPREX='([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])'
-	CURRENT_IP=$(curl -s $CHECKURL|grep -Eo "$IPREX"|tail -n1)
+	CURRENT_IP=$(curl -k -s $CHECKURL|grep -Eo "$IPREX"|tail -n1)
 	echo "CURRENT_IP:$CURRENT_IP"
 
 	DNSCMD="nslookup";type nslookup >/dev/null 2>&1||DNSCMD="ping -c1"
@@ -98,7 +98,7 @@ fi
 
 echo Start DDNS update...
 
-Record_Ddns="$(curl $(if [ -n "$OUT" ]; then echo "--interface $OUT"; fi) -s -X POST https://dnsapi.cn/Record.Ddns -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}")"
+Record_Ddns="$(curl $(if [ -n "$OUT" ]; then echo "--interface $OUT"; fi) -s -k -X POST https://dnsapi.cn/Record.Ddns -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}")"
 
 for line in $Record_Ddns;do
     if [ $(echo $line|grep '<message>' |wc -l) != 0 ];then
