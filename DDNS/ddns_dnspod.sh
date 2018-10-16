@@ -11,7 +11,7 @@ CHECKURL=http://icanhazip.com/
 # system config
 DNSPOD_TOKEN="login_token=${API_ID},${API_Token}"
 UPDATE_STATUS=0
-
+date
 # function
 dnspod_send_email(){
 
@@ -38,7 +38,7 @@ dnspod_send_email(){
 
 ## DNS_IP = CURRENT_IP
 	IPREX='([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])'
-	CURRENT_IP=$(curl -k -s $CHECKURL|grep -Eo "$IPREX"|tail -n1)
+	CURRENT_IP=$(curl -s $CHECKURL|grep -Eo "$IPREX"|tail -n1)
 	echo "CURRENT_IP:$CURRENT_IP"
 
 	DNSCMD="nslookup";type nslookup >/dev/null 2>&1||DNSCMD="ping -c1"
@@ -100,11 +100,16 @@ echo Start DDNS update...
 
 Record_Ddns="$(curl $(if [ -n "$OUT" ]; then echo "--interface $OUT"; fi) -s -k -X POST https://dnsapi.cn/Record.Ddns -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}")"
 
+DDNS_RESULT=${Record_Ddns#*\<message\>};
+DDNS_RESULT=${DDNS_RESULT%%\</message\>*};
+echo -n -e "\033[1;32;40mCongratulations! \033[0m$DDNS_RESULT"
+#echo -e "\033[字背景颜色;字体颜色m 字符串 \033[0m" 
 for line in $Record_Ddns;do
-    if [ $(echo $line|grep '<message>' |wc -l) != 0 ];then
-        DDNS_RESULT=${line%<*};
-        DDNS_RESULT=${DDNS_RESULT#*>};
-        echo "DDNS_RESULT: $DDNS_RESULT";
+    if [ $(echo $line|grep '<value>' |wc -l) != 0 ];then
+        Finale_IP=${line%<*};
+        Finale_IP=${Finale_IP#*>};
+        echo "Finale_IP: $Finale_IP";
     fi
 done
 UPDATE_STATUS=1
+dnspod_send_email
