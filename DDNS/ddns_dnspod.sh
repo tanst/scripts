@@ -6,7 +6,9 @@ API_Token=924617b61d423f1c3ee823d94753c2ce
 SUBDOMAIN=@
 DOMAIN=tanst.net
 Email=t@tanst.net
-CHECKURL=$(curl -s -4 icanhazip.com)
+CHECKURL_1=myip.ipip.net
+CHECKURL_2=ip.3322.org
+CHECKURL_3=icanhazip.com
 
 # system config
 DNSPOD_TOKEN="login_token=${API_ID},${API_Token}"
@@ -23,13 +25,34 @@ dnspod_send_email(){
 
 CURRENT_IP() {
     
-	CURRENT_IP=$CHECKURL
-	if [ $CURRENT_IP ]
+	IPREX='([^0-9]|\b)((1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\.){3}(1[0-9][0-9]|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])([^0-9]|\b)'
+	SEDREX='s/([^0-9]|\b)(([0-9]{1,3}\.){3}[0-9]{1,3})([^0-9]|\b)/\2/p'
+
+	CURRENT_IP=$(curl -k -s $CHECKURL_1 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
+
+	if test $CURRENT_IP 
 	then
-	echo "CURRENT_IP : $CURRENT_IP"
+		echo "success : $CHECKURL_1 获取公网IP正常"
+		echo "CURRENT_IP : $CURRENT_IP"
 	else
-	echo "获取公网IP错误，请检查URL是否正常"
-	exit
+		echo "error : $CHECKURL_1 获取公网IP错误，请检查URL是否正常"
+		CURRENT_IP=$(curl -k -s $CHECKURL_2 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
+		if test $CURRENT_IP 
+		then
+			echo "success : $CHECKURL_2 获取公网IP正常"
+			echo "CURRENT_IP : $CURRENT_IP"
+		else
+			echo "error : $CHECKURL_2 获取公网IP错误，请检查URL是否正常"
+			CURRENT_IP=$(curl -k -s $CHECKURL_3 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
+			if test $CURRENT_IP 
+			then
+				echo "success : $CHECKURL_3 获取公网IP正常"
+				echo "CURRENT_IP : $CURRENT_IP"
+			else
+				echo "error : $CHECKURL_3 获取公网IP错误，请检查URL是否正常"
+				exit
+			fi
+		fi
 	fi
 	
 }
