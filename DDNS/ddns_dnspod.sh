@@ -19,7 +19,7 @@ cd $(dirname $0)
 dnspod_send_email(){
 
 	curl -k https://tanst.net/script/mail.php -X POST -d "event=the New ip is: $CURRENT_IP&title=[K2P]The IP Changed! &email=$Email"
-	echo -e "\033[1;32;40mEmail is sent successfully."
+	echo -e "\033[1;32;40mEmail is sent succeededfully."
 	exit
 }
 
@@ -32,21 +32,21 @@ CURRENT_IP() {
 
 	if test $CURRENT_IP 
 	then
-		echo "success : $CHECKURL_1 获取公网IP正常"
+		echo "succeeded : $CHECKURL_1 获取公网IP正常"
 		echo "CURRENT_IP : $CURRENT_IP"
 	else
 		echo "error : $CHECKURL_1 获取公网IP错误，请检查URL是否正常"
 		CURRENT_IP=$(curl -k -s $CHECKURL_2 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
 		if test $CURRENT_IP 
 		then
-			echo "success : $CHECKURL_2 获取公网IP正常"
+			echo "succeeded : $CHECKURL_2 获取公网IP正常"
 			echo "CURRENT_IP : $CURRENT_IP"
 		else
 			echo "error : $CHECKURL_2 获取公网IP错误，请检查URL是否正常"
 			CURRENT_IP=$(curl -k -s $CHECKURL_3 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
 			if test $CURRENT_IP 
 			then
-				echo "success : $CHECKURL_3 获取公网IP正常"
+				echo "succeeded : $CHECKURL_3 获取公网IP正常"
 				echo "CURRENT_IP : $CURRENT_IP"
 			else
 				echo "error : $CHECKURL_3 获取公网IP错误，请检查URL是否正常"
