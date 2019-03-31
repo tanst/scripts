@@ -6,6 +6,7 @@ API_Token=924617b61d423f1c3ee823d94753c2ce
 SUBDOMAIN=@
 DOMAIN=tanst.net
 Email=t@tanst.net
+Email_title='[K2P]The IP Changed.'
 CHECKURL_1=myip.ipip.net
 CHECKURL_2=ip.3322.org
 CHECKURL_3=icanhazip.com
@@ -17,8 +18,7 @@ cd $(dirname $0)
 
 # function
 dnspod_send_email(){
-
-	curl -k https://tanst.net/script/mail.php -X POST -d "event=the New ip is: $CURRENT_IP&title=[K2P]The IP Changed! &email=$Email"
+	curl -k https://tanst.net/script/mail.php -X POST -d "event=the New ip is: $CURRENT_IP&title=$Email_title&email=$Email"
 	echo -e "\033[1;32;40mEmail is sent succeededfully."
 	exit
 }
