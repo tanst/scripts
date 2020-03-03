@@ -1,23 +1,26 @@
 #!/bin/sh
+#====IPv4=========#
 
-# personal config
-API_ID=71374
-API_Token=924617b61d423f1c3ee823d94753c2ce
+#必须手动先创建一个任意A记录#
+
+#===============personal config==============#
+API_ID=126523
+API_Token=a7d9e348a059bfaa5164beda35d3444d
 SUBDOMAIN=@
-DOMAIN=tanst.net
-Email=t@tanst.net
+DOMAIN=example.com
+Email=admin@example.com
 Email_title='The IP Changed.'
-Email_sender='K2P'
+Email_sender='Router'
 CHECKURL_1=myip.ipip.net
-CHECKURL_2=ip.3322.org
-CHECKURL_3=icanhazip.com
+CHECKURL_2=ipv4.ip.sb
+CHECKURL_3=ipv4.icanhazip.com
 
-# system config
+#=============== system config ===============
 DNSPOD_TOKEN="login_token=${API_ID},${API_Token}"
 date
 cd $(dirname $0)
 
-# function
+#=============== function ===============
 dnspod_send_email(){
 	curl -k https://tanst.net/script/mail.php -X POST -d "event=the New ip is: $CURRENT_IP&title=$Email_title&email=$Email&sender=$Email_sender"
 	echo -e "\033[1;32;40mEmail is sent succeededfully."
@@ -26,10 +29,15 @@ dnspod_send_email(){
 
 CURRENT_IP() {
     
-	IPREX='([^0-9]|\b)((1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\.){3}(1[0-9][0-9]|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])([^0-9]|\b)'
-	SEDREX='s/([^0-9]|\b)(([0-9]{1,3}\.){3}[0-9]{1,3})([^0-9]|\b)/\2/p'
-
-	CURRENT_IP=$(curl -k -s $CHECKURL_1 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
+	if type curl >/dev/null 2>&1; then
+		echo "curl 已安装"
+	else
+		echo "curl 未安装"
+		exit
+	fi
+	
+	IPv4REX='[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}'
+	CURRENT_IP=$(curl -k -s $CHECKURL_1 | grep -Eo "$IPv4REX")
 
 	if test $CURRENT_IP 
 	then
@@ -37,14 +45,14 @@ CURRENT_IP() {
 		echo "CURRENT_IP : $CURRENT_IP"
 	else
 		echo "error : $CHECKURL_1 获取公网IP错误，请检查URL是否正常"
-		CURRENT_IP=$(curl -k -s $CHECKURL_2 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
+		CURRENT_IP=$(curl -k -s $CHECKURL_2 | grep -Eo "$IPv4REX" | sed -nr "$SEDREX")
 		if test $CURRENT_IP 
 		then
 			echo "succeeded : $CHECKURL_2 获取公网IP正常"
 			echo "CURRENT_IP : $CURRENT_IP"
 		else
 			echo "error : $CHECKURL_2 获取公网IP错误，请检查URL是否正常"
-			CURRENT_IP=$(curl -k -s $CHECKURL_3 | grep -Eo "$IPREX" | sed -nr "$SEDREX")
+			CURRENT_IP=$(curl -k -s $CHECKURL_3 | grep -Eo "$IPv4REX" | sed -nr "$SEDREX")
 			if test $CURRENT_IP 
 			then
 				echo "succeeded : $CHECKURL_3 获取公网IP正常"
@@ -90,8 +98,8 @@ dnspod_update() {
 
 	echo Start DDNS update...
 
-	Record_Ddns="$(curl -s -k -X POST https://dnsapi.cn/Record.Ddns -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}")"
-
+	Record_Ddns="$(curl -s -k -X POST https://dnsapi.cn/Record.Ddns -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}&value=${CURRENT_IP}")"
+	
 	DDNS_RESULT=${Record_Ddns#*\<message\>};
 	DDNS_RESULT=${DDNS_RESULT%%\</message\>*};
 	echo -e "\033[1;32;40m$DDNS_RESULT"
