@@ -10,3 +10,5 @@
 - [`http://members.3322.org/dyndns/getip/`](http://members.3322.org/dyndns/getip/)
 - [`http://ipv4.ip.sb`](http://ipv4.ip.sb)
 - [`http://ip.cip.cc`](http://ip.cip.cc)
+- [`http://myip.dnsomatic.com`](http://myip.dnsomatic.com)
+- [`http://checkip.dyndns.com/`](http://checkip.dyndns.com/)
