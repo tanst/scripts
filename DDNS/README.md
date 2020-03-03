@@ -8,3 +8,5 @@
 - [`http://ident.me/`](http://ident.me)
 - [`http://whatismyip.akamai.com/`](http://whatismyip.akamai.com)
 - [`http://members.3322.org/dyndns/getip/`](http://members.3322.org/dyndns/getip/)
+- [`http://ipv4.ip.sb`](http://ipv4.ip.sb)
+- [`http://ip.cip.cc`](http://ip.cip.cc)
