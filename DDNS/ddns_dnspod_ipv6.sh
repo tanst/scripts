@@ -5,12 +5,17 @@
 
 #===============personal config==============
 API_ID=123456
-API_Token=a7d9e3123456bfaa516412345673444d
-SUBDOMAIN=ipv6
+API_Token=b32g354g532g34h345g45ga35d3444d
+SUBDOMAIN=@
 DOMAIN=example.com
+
 Email=admin@example.com
 Email_title='The IP Changed.'
 Email_sender='Router'
+WCappToken=AT_DB8w1TG9exYynhAUTHNIfkPQpf72UlfD
+WCuids=UID_bq3pWy05on21zQiwyQ5WMfb3MhTK
+
+#===========================================
 CHECKURL_1=ipv6.ip.sb
 CHECKURL_2=ipv6.icanhazip.com
 CHECKURL_3=checkip.dns.he.net
@@ -25,6 +30,17 @@ dnspod_send_email(){
 	curl -k https://tanst.net/script/mail.php -X POST -d "event=the New ip is: $CURRENT_IP&title=$Email_title&email=$Email&sender=$Email_sender"
 	echo -e "\033[1;32;40mEmail is sent succeededfully."
 	exit
+}
+
+dnspod_send_wechat(){
+    date=`date "+%Y-%m-%d %H:%M:%S"`
+    JSON='{
+      "appToken":"'$WCappToken'",
+      "content":"'$Email_sender' 的IP地址已更改为：\n'$CURRENT_IP'\n时间：'$date'",
+      "contentType":1,
+      "uids":["'$WCuids'"]
+    }'
+    curl -k http://wxpusher.zjiecode.com/api/send/message -X POST -H "Content-Type: application/json" -d "${JSON}"
 }
 
 CURRENT_IP() {
@@ -111,6 +127,8 @@ dnspod_update() {
 			echo -e "\033[0mFinale_IP: \033[1;32;40m$Finale_IP";
 		fi
 	done
+
+	dnspod_send_wechat
 	dnspod_send_email
 
 }
