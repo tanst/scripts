@@ -7,7 +7,7 @@
 ## Written By MoeClub.org
 
 ## Example:
-## bash <(curl -s https://raw.githubusercontent.com/mixool/script/source/moeclub_os.sh) -d 10 -v 64 -p zUEf5gdADnEYVabzH7nPevb6Mm -a
+## bash <(curl -s https://raw.githubusercontent.com/tanst/scripts/master/moeclub_dd_os.sh) -d 10 -v 64 -p zUEf5gdADnEYVabzH7nPevb6Mm -a
 ## -d debian 10
 ## -v 64位
 ## -P 密码
