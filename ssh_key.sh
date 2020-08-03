@@ -1,8 +1,8 @@
 #/bin/sh
 
-echo -e "\033[0;33m============================\033[0m"
-echo -e "\033[0;32mbash <(curl -Lso- https://raw.githubusercontent.com/tanst/scripts/master/ssh_key.sh)\033[0m"
-echo -e "\033[0;33m============================\033[0m"
+###################################
+#    bash <(curl -Lso- https://raw.githubusercontent.com/tanst/scripts/master/ssh_key.sh)
+###################################
 
 cd ~
 echo "PS1='\[\e[1;32;40m\][\u@\h:\t \W]\$ \[\e[0m\]'" >> ~/.bashrc && source ~/.bashrc
