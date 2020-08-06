@@ -1,8 +1,8 @@
 #!/bin/sh
 
-###################################
+#====================================================
 #    bash <(curl -Lso- https://raw.githubusercontent.com/tanst/scripts/master/Docker/Install_Docker.sh)
-###################################
+#====================================================
 
 #Install docker
 if which docker >/dev/null; then
