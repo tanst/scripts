@@ -4,7 +4,7 @@
 #    bash <(curl -Lso- https://raw.githubusercontent.com/tanst/scripts/master/ssh_key.sh)
 ###################################
 
-echo "PS1='\[\e[1;32;40m\][\u@\h:\t \W]\$ \[\e[0m\]'" >> ~/.bashrc
+echo "PS1='\[\e[1;32;40m\][\u@\h - \t \W]\$ \[\e[0m\]'" >> ~/.bashrc
 echo "alias ll='ls --color=auto -l'" >> ~/.bashrc
 echo "alias ls='ls --color=auto'" >> ~/.bashrc
 mkdir ~/.ssh
