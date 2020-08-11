@@ -4,6 +4,7 @@
 #    bash <(curl -Lso- https://raw.githubusercontent.com/tanst/scripts/master/Docker/Install_Docker.sh)
 #====================================================
 
+[[ "$EUID" -ne '0' ]] && echo "Error:This script must be run as root!" && exit 1;
 #Install docker
 if which docker >/dev/null; then
     echo "Docker has been installed, skip the installation steps"
@@ -12,7 +13,7 @@ if which docker >/dev/null; then
     service docker start
 else
     echo "Start installing Docker"
-    curl -fsSL get.docker.com | sudo sh && docker -v
+    curl -fsSL get.docker.com | sh && docker -v
     echo "Start Docker"
     systemctl enable docker && systemctl start docker
 fi
