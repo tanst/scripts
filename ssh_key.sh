@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 ###################################
 #    bash <(curl -Lso- https://raw.githubusercontent.com/tanst/scripts/master/ssh_key.sh)
