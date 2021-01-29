@@ -1,12 +1,20 @@
 #!/bin/sh
 
+# 使用说明：
+# 利用 qbittorrent 下载完成时运行外部程序进行重命名方便搜刮器搜刮，不影响做种
+# 脚本放置 /config 目录下，下载时设置分类：guochan
+# qbittorrent 设置：设置-下载-Torrent 完成时运行外部程序：
+# sh /config/add_senson.sh %I %L
+
+#######################################
 HOST=http://127.0.0.1:9094
 USR=user
 PAS=password
+CATEGORY_DECIDE=guochan
 HASH=$1
 CATEGORY=$2
 #######################################
-if [ "${CATEGORY}" != 'guochan' ]; then
+if [ "${CATEGORY}" != "${CATEGORY_DECIDE}" ]; then
 	exit
 fi
 
