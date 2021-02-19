@@ -7,10 +7,11 @@
 ## Written By MoeClub.org
 
 ## Example:
-## bash <(curl -s https://raw.githubusercontent.com/tanst/scripts/master/moeclub_dd_os.sh) -d 10 -v 64 -p zUEf5gdADnEYVabzH7nPevb6Mm -a
+## bash <(curl -s https://raw.githubusercontent.com/tanst/scripts/master/moeclub_dd_os.sh) -d 10 -v 64 -p zUEf5gdADnEYVabzH7nPevb6Mm -a --mirror 'https://mirrors.cloud.tencent.com/debian/'
 ## -d debian 10
 ## -v 64位
 ## -P 密码
+## --mirror 镜像
 
 export tmpVER=''
 export tmpDIST=''
