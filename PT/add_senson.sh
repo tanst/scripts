@@ -30,7 +30,7 @@ while read line; do
 	id=$(($id + 1))
 	se="$(echo ${line} | grep -E [sS][0-9]\{1,2\}[eE][0-9]\{1,2\})"
 	if [ -z "$se" ]; then
-		name=$(echo "${line}" | sed 's/\([eE]\|ep\|Ep\|EP[0-9]\{1,2\}\)/S01\1/g')
+		name=$(echo "${line}" | sed 's/\([eE][0-9]\{1,2\}\|ep[0-9]\{1,2\}\|Ep[0-9]\{1,2\}\|EP[0-9]\{1,2\}\)/S01\1/g')
 		echo "${id}:${name}"
 		curl -s -k "${HOST}/api/v2/torrents/renameFile?hash=${HASH}&id=${id}&name=${name}" --cookie "SID=$COOKIE"
 	fi
