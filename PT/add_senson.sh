@@ -22,17 +22,19 @@ cd $(dirname $0)
 
 COOKIE="$(curl -i -s -k --header Referer: "${HOST}" --data "username=${USR}&password=${PAS}" "${HOST}/api/v2/auth/login" | grep SID | sed 's/.*SID=\(.*\); H.*/\1/')"
 
-FILES_LIST="$(curl -s -k "${HOST}/api/v2/torrents/files?hash=${HASH}" --cookie "SID=$COOKIE" | sed "s/},{/}\n{/g" | sed 's/.*"name":"\(.*\)","piece_range".*/\1/g' | sed 's/.*\/\(.*\)/\1/g')"
+FILES_LIST="$(curl -s -k "${HOST}/api/v2/torrents/files?hash=${HASH}" --cookie "SID=$COOKIE" | sed "s/},{/}\n{/g" | sed 's/.*"name":"\(.*\)","piece_range".*/\1/g')"
 
 echo "${FILES_LIST}" >/dev/shm/FILESLIST$$
-id=-1
+
 while read line; do
-	id=$(($id + 1))
-	se="$(echo ${line} | grep -E [sS][0-9]\{1,2\}[eE][0-9]\{1,2\})"
+	echo "oldPath:${line}"
+	#去中文名
+	newPath="$(echo ${line} | sed 's/[^ -z]//g' | sed 's/^[.]//g')"
+	se="$(echo ${newPath} | grep -E [sS][0-9]\{1,2\}[eE][0-9]\{1,2\})"
 	if [ -z "$se" ]; then
-		name=$(echo "${line}" | sed 's/\([eE][0-9]\{1,2\}\|ep[0-9]\{1,2\}\|Ep[0-9]\{1,2\}\|EP[0-9]\{1,2\}\)/S01\1/g')
-		echo "${id}:${name}"
-		curl -s -k "${HOST}/api/v2/torrents/renameFile?hash=${HASH}&id=${id}&name=${name}" --cookie "SID=$COOKIE"
+		newPath=$(echo "${newPath}" | sed 's/\([eE][0-9]\{1,2\}\|ep[0-9]\{1,2\}\|Ep[0-9]\{1,2\}\|EP[0-9]\{1,2\}\)/S01\1/g')
+		echo "newPath:${newPath}"
+		curl -s -k "${HOST}/api/v2/torrents/renameFile?hash=${HASH}&oldPath=${line}&newPath=${newPath}" --cookie "SID=$COOKIE"
 	fi
 done </dev/shm/FILESLIST$$
 rm /dev/shm/FILESLIST$$
