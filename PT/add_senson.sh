@@ -29,7 +29,7 @@ echo "${FILES_LIST}" >/dev/shm/FILESLIST$$
 while read line; do
 	echo "oldPath:${line}"
 	#去中文名
-	newPath="$(echo ${line} | sed 's/[^a-zA-Z0-9.-_]//g' | sed 's/^[.]//g' | sed 's/^[.]//g' | sed 's/\/\./\//g')"
+	newPath="$(echo ${line} | sed 's/[^A-Za-z0-9._/-]//g' | sed 's/^[.]//g' | sed 's/^[.]//g' | sed 's/\/\./\//g')"
 	se="$(echo ${newPath} | grep -E [sS][0-9]\{1,2\}[eE][0-9]\{1,2\})"
 	if [ -z "$se" ]; then
 		newPath=$(echo "${newPath}" | sed 's/\([eE][0-9]\{1,2\}\|ep[0-9]\{1,2\}\|Ep[0-9]\{1,2\}\|EP[0-9]\{1,2\}\)/S01\1/g')
