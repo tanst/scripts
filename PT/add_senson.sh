@@ -26,19 +26,15 @@ FILES_LIST="$(curl -s -k "${HOST}/api/v2/torrents/files?hash=${HASH}" --cookie "
 
 echo "${FILES_LIST}" >/dev/shm/FILESLIST$$
 
-while read line; do
-    echo "oldPath:${line}"
+while read oldPath; do
+    echo "oldPath:${oldPath}"
     #去中文名
-    newPath="$(echo ${line} | sed 's/[^A-Za-z0-9._/-]//g' | sed 's/^[.]//g' | sed 's/^[.]//g' | sed 's/\/\./\//g')"
+    newPath="$(echo ${oldPath} | sed 's/[^A-Za-z0-9 ._/-]//g' | sed 's/^[.]//g' | sed 's/^[.]//g' | sed 's/\/\./\//g')"
     se="$(echo ${newPath} | grep -E [sS][0-9]\{1,2\}[eE][0-9]\{1,2\})"
     if [ -z "$se" ]; then
         newPath=$(echo "${newPath}" | sed 's/\([eE][0-9]\{1,2\}\|ep[0-9]\{1,2\}\|Ep[0-9]\{1,2\}\|EP[0-9]\{1,2\}\)/S01\1/g')
         echo "newPath:${newPath}"
-        # space urlencode
-        oldPath="$(echo ${oldPath} | sed 's/ /%20/g')"
-        newPath="$(echo ${newPath} | sed 's/ /%20/g')"
-        # API
-        curl -s -k "${HOST}/api/v2/torrents/renameFile?hash=${HASH}&oldPath=${line}&newPath=${newPath}" --cookie "SID=$COOKIE"
+        curl -s -k -G --data-urlencode "oldPath=${oldPath}" --data-urlencode "newPath=${newPath}" "${HOST}/api/v2/torrents/renameFile?hash=${HASH}"  --cookie "SID=$COOKIE"
     fi
 done </dev/shm/FILESLIST$$
 rm /dev/shm/FILESLIST$$
