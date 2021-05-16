@@ -17,7 +17,6 @@ CATEGORY=$2
 if [ "${CATEGORY}" != "${CATEGORY_DECIDE}" ]; then
     exit
 fi
-
 cd $(dirname $0)
 
 COOKIE="$(curl -i -s -k --header Referer: "${HOST}" --data "username=${USR}&password=${PAS}" "${HOST}/api/v2/auth/login" | grep SID | sed 's/.*SID=\(.*\); H.*/\1/')"
@@ -27,16 +26,16 @@ FILES_LIST="$(curl -s -k "${HOST}/api/v2/torrents/files?hash=${HASH}" --cookie "
 echo "${FILES_LIST}" >/dev/shm/FILESLIST$$
 
 while read oldPath; do
-	se="$(echo ${oldPath} | grep -iE s[0-9]\{1,2\}ep\?[0-9]\{1,2\})"
+    se="$(echo ${oldPath} | grep -iE s[0-9]\{1,2\}ep\?[0-9]\{1,2\})"
     newPath="${oldPath}"
-	if test -z "$se" ; then
-		#去中文
-		#newPath="$(echo ${oldPath} | sed 's/[^A-Za-z0-9 ._/-]//g' | sed 's/^[ .]//g' | sed 's/\/\./\//g')"
-		newPath=$(echo "${newPath}" | sed 's/ep\?\([0-9]\{1,2\}\)/S01E\1/gi')
-		curl -s -k -G --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" "$HOST/api/v2/torrents/renameFile?hash=$HASH"  --cookie "SID=$COOKIE"
-	fi
-	echo "=============================="
-	echo "oldPath : $oldPath"
-	echo "newPath : $newPath"
+    if test -z "$se"; then
+        #去中文
+        #newPath="$(echo ${oldPath} | sed 's/[^A-Za-z0-9 ._/-]//g' | sed 's/^[ .]//g' | sed 's/\/\./\//g')"
+        newPath=$(echo "${newPath}" | sed 's/ep\?\([0-9]\{1,2\}\)/S01E\1/gi')
+        curl -s -k -G --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" "$HOST/api/v2/torrents/renameFile?hash=$HASH" --cookie "SID=$COOKIE"
+    fi
+    echo "=============================="
+    echo "oldPath : $oldPath"
+    echo "newPath : $newPath"
 done </dev/shm/FILESLIST$$
 rm /dev/shm/FILESLIST$$
