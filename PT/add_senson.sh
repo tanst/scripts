@@ -27,7 +27,7 @@ FILES_LIST="$(curl -s -k "${HOST}/api/v2/torrents/files?hash=${HASH}" --cookie "
 echo "${FILES_LIST}" >/dev/shm/FILESLIST$$
 
 while read oldPath; do
-    #需去中文名,注释 33 行，取消注释 32 行。
+    #需去中文名,取消注释 31 行，注释掉 32 行。
     #newPath="$(echo ${oldPath} | sed 's/[^A-Za-z0-9 ._/-]//g' | sed 's/^[ .]//g' | sed 's/\/\./\//g')"
     newPath="${oldPath}"
     se="$(echo ${newPath} | grep -E [sS][0-9]\{1,2\}[eE][0-9]\{1,2\})"
