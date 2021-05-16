@@ -27,16 +27,16 @@ FILES_LIST="$(curl -s -k "${HOST}/api/v2/torrents/files?hash=${HASH}" --cookie "
 echo "${FILES_LIST}" >/dev/shm/FILESLIST$$
 
 while read oldPath; do
-    #需去中文名,取消注释 31 行，注释掉 32 行。
-    #newPath="$(echo ${oldPath} | sed 's/[^A-Za-z0-9 ._/-]//g' | sed 's/^[ .]//g' | sed 's/\/\./\//g')"
+	se="$(echo ${oldPath} | grep -iE s[0-9]\{1,2\}ep\?[0-9]\{1,2\})"
     newPath="${oldPath}"
-    se="$(echo ${newPath} | grep -E [sS][0-9]\{1,2\}[eE][0-9]\{1,2\})"
-    if [ -z "$se" ]; then
-        newPath=$(echo "${newPath}" | sed 's/\([eE][0-9]\{1,2\}\|ep[0-9]\{1,2\}\|Ep[0-9]\{1,2\}\|EP[0-9]\{1,2\}\)/S01\1/g')
-        curl -s -k -G --data-urlencode "oldPath=${oldPath}" --data-urlencode "newPath=${newPath}" "${HOST}/api/v2/torrents/renameFile?hash=${HASH}"  --cookie "SID=$COOKIE"
-    fi
-    echo "=============================="
-    echo "oldPath : ${oldPath}"
-    echo "newPath : ${newPath}"
+	if test -z "$se" ; then
+		#去中文
+		#newPath="$(echo ${oldPath} | sed 's/[^A-Za-z0-9 ._/-]//g' | sed 's/^[ .]//g' | sed 's/\/\./\//g')"
+		newPath=$(echo "${newPath}" | sed 's/ep\?\([0-9]\{1,2\}\)/S01E\1/gi')
+		curl -s -k -G --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" "$HOST/api/v2/torrents/renameFile?hash=$HASH"  --cookie "SID=$COOKIE"
+	fi
+	echo "=============================="
+	echo "oldPath : $oldPath"
+	echo "newPath : $newPath"
 done </dev/shm/FILESLIST$$
 rm /dev/shm/FILESLIST$$
