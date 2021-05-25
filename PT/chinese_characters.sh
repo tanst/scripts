@@ -21,7 +21,7 @@ clear_chinese_char(){
     FILES_LIST="$(curl -s -k "${HOST}/api/v2/torrents/files?hash=${HASH}" --cookie "SID=$COOKIE" | sed "s/},{/}\n{/g" | sed 's/.*"name":"\(.*\)","piece_range".*/\1/g')"
     echo "${FILES_LIST}" >/dev/shm/FILESLIST$$
     while read oldPath; do
-        newPath="$(echo ${oldPath} | sed 's/[. ]/\n/g' | sed 's/\//\/\n/g' | sed '/[^A-Za-z0-9 -/@_&]/d' | sed ':a;N;s/\n/./g;ta' | sed 's/\/\./\//g')"
+        newPath="$(echo ${oldPath} | sed 's/[. ]/\n/g' | sed 's/\//\/\n/g' | sed '/[^A-Za-z0-9 -/@_&￡]/d' | sed ':a;N;s/\n/./g;ta' | sed 's/\/\./\//g')"
         curl -s -k -G --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" "$HOST/api/v2/torrents/renameFile?hash=$HASH" --cookie "SID=$COOKIE"
         echo "=============================="
         echo "oldPath : $oldPath"
