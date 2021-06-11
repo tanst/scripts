@@ -357,3 +357,13 @@ http://39.135.53.199/ott.fj.chinamobile.com/PLTV/88888888/224/3221225901/index.m
 http://39.135.53.199/ott.fj.chinamobile.com/PLTV/88888888/224/3221225900/index.m3u8
 #EXTINF:-1 tvg-logo="http://epg.51zmt.top:8000/tb1/gt/fenghuangxianggang.png" tvg-id="143" tvg-name="凤凰香港" group-title="港澳及国外",凤凰卫视香港台
 http://223.110.245.136/PLTV/3/224/3221226975/index.m3u8
+#EXTINF:-1 tvg-logo="http://epg.51zmt.top:8000/tb1/gt/fenghuangzhongwen.png" tvg-id="144" tvg-name="成都凤凰中文" group-title="港澳及国外",凤凰卫视中文台
+http://10.10.10.10:50229/rtp/239.93.0.162:2192
+#EXTINF:-1 tvg-logo="http://epg.51zmt.top:8000/tb1/gt/fenghuangzixun.png" tvg-id="145" tvg-name="成都凤凰资讯" group-title="港澳及国外",凤凰卫视资讯台
+http://10.10.10.10:50229/rtp/239.93.0.118:2191
+#EXTINF:-1 tvg-logo="http://epg.51zmt.top:8000/tb1/gt/mtvlivehd.png" tvg-id="146" tvg-name="成都MTV" group-title="其他",MTV(576p)
+http://10.10.10.10:50229/rtp/239.93.0.157:2194
+#EXTINF:-1 tvg-id="147" tvg-name="成都星空卫视" group-title="其他",星空卫视(576p)
+http://10.10.10.10:50229/rtp/239.93.0.156:2193
+#EXTINF:-1 tvg-id="148" tvg-name="成都天翼高清" group-title="其他",天翼高清（1080p）
+http://10.10.10.10:50229/rtp/239.93.1.113:5140
