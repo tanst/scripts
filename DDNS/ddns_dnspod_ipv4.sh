@@ -3,19 +3,23 @@
 
 #必须手动先创建一个任意A记录#
 
-#===============personal config==============#
-API_ID=12456
-API_Token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#===============personal config==============
+API_ID=123456
+API_Token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 SUBDOMAIN=@
 DOMAIN=example.com
-Email_to=admin@example.com
+
+Email=admin@example.com
 Email_title='The IP Changed.'
 Email_fr='Router-Home'
+
+WCappToken=AT_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+WCuids=UID_XXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 CHECKURL_1=myip.ipip.net
 CHECKURL_2=ipv4.ip.sb
 CHECKURL_3=ipv4.icanhazip.com
-WCappToken=AT_xxxxxxxxxxxxxxxxxxxxxxxxxx
-WCuids=UID_xxxxxxxxxxxxxxxxxxxxxxxxx
+
 #=============== system config ===============
 DNSPOD_TOKEN="login_token=${API_ID},${API_Token}"
 date
@@ -28,8 +32,8 @@ dnspod_send_email() {
     exit
 }
 
-dnspod_send_wechat() {
-    date=$(date "+%Y-%m-%d %H:%M:%S")
+dnspod_send_wechat(){
+    date=`date "+%Y-%m-%d %H:%M:%S"`
     JSON='{
       "appToken":"'$WCappToken'",
       "content":"'$Email_fr' 的IP地址已更改为：\n'$CURRENT_IP'\n时间：'$date'",
@@ -121,7 +125,7 @@ dnspod_update() {
 
     echo Start DDNS update...
 
-    Record_Ddns="$(curl -s -k -X POST https://dnsapi.cn/Record.Ddns -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}&value=${CURRENT_IP}")"
+	Record_Ddns="$(curl -s -k -X POST https://dnsapi.cn/Record.Modify -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_type=AAAA&record_line=默认&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}&value=${CURRENT_IP}")"
 
     DDNS_RESULT=${Record_Ddns#*\<message\>}
     DDNS_RESULT=${DDNS_RESULT%%\</message\>*}
@@ -136,6 +140,7 @@ dnspod_update() {
     done
 
     dnspod_send_wechat
+    sleep 2
     dnspod_send_email
 
 }
