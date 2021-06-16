@@ -4,8 +4,8 @@
 #必须手动先创建一个任意A记录#
 
 #===============personal config==============#
-API_ID=126523
-API_Token=a7d9e348a059bfaa5164beda35d3444d
+API_ID=12456
+API_Token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 SUBDOMAIN=@
 DOMAIN=example.com
 Email_to=admin@example.com
@@ -14,8 +14,8 @@ Email_fr='Router-Home'
 CHECKURL_1=myip.ipip.net
 CHECKURL_2=ipv4.ip.sb
 CHECKURL_3=ipv4.icanhazip.com
-WCappToken=AT_DB8w1TG9LKJlHLhkPQpf72UlfD
-WCuids=UID_bq3LJlkjLUlJLjlHJMfb3MhTK
+WCappToken=AT_xxxxxxxxxxxxxxxxxxxxxxxxxx
+WCuids=UID_xxxxxxxxxxxxxxxxxxxxxxxxx
 #=============== system config ===============
 DNSPOD_TOKEN="login_token=${API_ID},${API_Token}"
 date
