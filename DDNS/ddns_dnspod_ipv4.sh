@@ -125,7 +125,7 @@ dnspod_update() {
 
     echo Start DDNS update...
 
-	Record_Ddns="$(curl -s -k -X POST https://dnsapi.cn/Record.Modify -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_type=AAAA&record_line=默认&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}&value=${CURRENT_IP}")"
+	Record_Ddns="$(curl -s -k -X POST https://dnsapi.cn/Record.Modify -d "${DNSPOD_TOKEN}&record_id=${RECORD_ID}&record_type=AAAA&record_line_id=${LINE_ID}&domain=${DOMAIN}&sub_domain=${SUBDOMAIN}&value=${CURRENT_IP}")"
 
     DDNS_RESULT=${Record_Ddns#*\<message\>}
     DDNS_RESULT=${DDNS_RESULT%%\</message\>*}
