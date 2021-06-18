@@ -96,19 +96,16 @@ GetWanIPv4() {
 
         if test $CURRENT_IPv4; then
             echo "succeeded: $CHECKURL_V4_1 获取公网IPv4正常"
-            echo "CURRENT_IPv4: $CURRENT_IPv4"
         else
             echo "error: $CHECKURL_V4_1 获取公网IPv4错误，请检查URL是否正常"
             CURRENT_IPv4=$(curl -4 -k -s $CHECKURL_V4_2 | grep -Eo "$IPv4REX" | sed -nr "$SEDREX")
             if test $CURRENT_IPv4; then
                 echo "succeeded: $CHECKURL_V4_2 获取公网IPv4正常"
-                echo "CURRENT_IPv4: $CURRENT_IPv4"
             else
                 echo "error: $CHECKURL_V4_2 获取公网IPv4错误，请检查URL是否正常"
                 CURRENT_IPv4=$(curl -4 -k -s $CHECKURL_V4_3 | grep -Eo "$IPv4REX" | sed -nr "$SEDREX")
                 if test $CURRENT_IPv4; then
                     echo "succeeded: $CHECKURL_V4_3 获取公网IPv4正常"
-                    echo "CURRENT_IPv4: $CURRENT_IPv4"
                 else
                     echo "error: $CHECKURL_V4_3 获取公网IPv4错误，请检查URL是否正常"
                     exit
@@ -117,32 +114,31 @@ GetWanIPv4() {
         fi
     else
         echo "succeeded: IPv4 通过网卡获取公网 IPv4 正常"
-        echo "CURRENT_IPv4: $CURRENT_IPv4"
     fi
 }
 
 GetWanIPv6() {
     IPv6REX='([a-f0-9]{1,4}(:[a-f0-9]{1,4}){7}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){0,7}::[a-f0-9]{0,4}(:[a-f0-9]{1,4}){0,7})'
     CURRENT_IPv6=$(curl -6 -k -s $CHECKURL_V6_1 | grep -Eo "$IPv6REX")
+    #改成群晖 IPv6
     CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/::5/')
 
     if test $CURRENT_IPv6; then
         echo "succeeded: $CHECKURL_V6_1 获取公网IPv6正常"
-        echo "CURRENT_IPv6: $CURRENT_IPv6"
     else
         echo "error: $CHECKURL_V6_1 获取公网IPv6错误，请检查URL是否正常"
         CURRENT_IPv6=$(curl -6 -k -s $CHECKURL_V6_2 | grep -Eo "$IPv6REX" | sed -nr "$SEDREX")
+        #改成群晖 IPv6
         CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/::5/')
         if test $CURRENT_IPv6; then
             echo "succeeded: $CHECKURL_V6_2 获取公网IPv6正常"
-            echo "CURRENT_IPv6: $CURRENT_IPv6"
         else
             echo "error: $CHECKURL_V6_2 获取公网IPv6错误，请检查URL是否正常"
             CURRENT_IPv6=$(curl -6 -k -s $CHECKURL_V6_3 | grep -Eo "$IPv6REX" | sed -nr "$SEDREX")
+            #改成群晖 IPv6
             CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/::5/')
             if test $CURRENT_IPv6; then
                 echo "succeeded: $CHECKURL_V6_3 获取公网IPv6正常"
-                echo "CURRENT_IPv6: $CURRENT_IPv6"
             else
                 echo "error: $CHECKURL_V6_3 获取公网IPv6错误，请检查URL是否正常"
                 exit
@@ -165,6 +161,8 @@ GetRecordIPv4() {
     if [ "$STATUS_CODE_s1v4" != "1" ]; then
         echo "Error: Get DNSPOD API Error!"
         exit
+    else
+        echo "succeeded: Get RecordIP Successfully"
     fi
 
     #= s2v4
@@ -178,18 +176,9 @@ GetRecordIPv4() {
     if [ "$STATUS_CODE_s2v4" != "1" ]; then
         echo "Error: Get DNSPOD API Error!"
         exit
+    else
+        echo "succeeded: Get RecordIP Successfully"
     fi
-
-    echo "RECORD_IP_s1v4: $RECORD_IP_s1v4"
-    echo "RECORD_ID_s1v4: $RECORD_ID_s1v4"
-    echo "LINE_ID_s1v4: $LINE_ID_s1v4"
-    echo "STATUS_CODE_s1v4: $STATUS_CODE_s1v4"
-    echo "======================"
-    echo "RECORD_IP_s2v4: $RECORD_IP_s2v4"
-    echo "RECORD_ID_s2v4: $RECORD_ID_s2v4"
-    echo "LINE_ID_s2v4: $LINE_ID_s2v4"
-    echo "STATUS_CODE_s2v4: $STATUS_CODE_s2v4"
-    echo "======================"
 }
 
 GetRecordIPv6() {
@@ -205,6 +194,8 @@ GetRecordIPv6() {
     if [ "$STATUS_CODE_s1v6" != "1" ]; then
         echo "Error: Get DNSPOD API Error!"
         exit
+    else
+        echo "succeeded: Get RecordIP Successfully"
     fi
 
     # s2v6
@@ -218,18 +209,9 @@ GetRecordIPv6() {
     if [ "$STATUS_CODE_s2v6" != "1" ]; then
         echo "Error: Get DNSPOD API Error!"
         exit
+    else
+        echo "succeeded: Get RecordIP Successfully"
     fi
-
-    echo "RECORD_IP_s1v6: $RECORD_IP_s1v6"
-    echo "RECORD_ID_s1v6: $RECORD_ID_s1v6"
-    echo "LINE_ID_s1v6: $LINE_ID_s1v6"
-    echo "STATUS_CODE_s1v6: $STATUS_CODE_s1v6"
-    echo "======================"
-    echo "RECORD_IP_s2v6: $RECORD_IP_s2v6"
-    echo "RECORD_ID_s2v6: $RECORD_ID_s2v6"
-    echo "LINE_ID_s2v6: $LINE_ID_s2v6"
-    echo "STATUS_CODE_s2v6: $STATUS_CODE_s2v6"
-    echo "======================"
 }
 
 UpdateIPv4() {
@@ -288,20 +270,36 @@ checkhost=checkip.dns.he.net
 
 ping -4 -c2 $checkhost >>/dev/null 2>&1
 if [ $? -eq 0 ]; then
-    echo "IPv4 network is ok."
+    echo -e "\nIPv4 network is ok."
     GetWanIPv4
     GetRecordIPv4
+    echo "=============================================================================="
+    printf "%-24s %-29s\n" "" "CURRENT_IPv4: $CURRENT_IPv4"
+    echo "------------------------------------------------------------------------------"
+    printf "%-18s %-25s %-18s %-25s \n" "RECORD_IP_s1v4: " "$RECORD_IP_s1v4" "RECORD_IP_s2v4: " "$RECORD_IP_s2v4"
+    printf "%-18s %-25s %-18s %-25s \n" "RECORD_ID_s1v4: " "$RECORD_ID_s1v4" "RECORD_ID_s2v4: " "$RECORD_ID_s2v4"
+    printf "%-18s %-25s %-18s %-25s \n" "LINE_ID_s1v4: " "$LINE_ID_s1v4" "LINE_ID_s2v4: " "$LINE_ID_s2v4"
+    printf "%-18s %-25s %-18s %-25s \n" "STATUS_CODE_s1v4: " "$STATUS_CODE_s1v4" "STATUS_CODE_s2v4: " "$STATUS_CODE_s2v4"    
+    echo "=============================================================================="
     UpdateIPv4
 else
-    echo "IPv4 network is down,please check it."
+    echo -e "\nIPv4 network is down,please check it."
 fi
 
 ping -6 -c2 $checkhost >>/dev/null 2>&1
 if [ $? -eq 0 ]; then
-    echo "IPv6 network is ok."
+    echo -e "\nIPv6 network is ok."
     GetWanIPv6
     GetRecordIPv6
+    echo "=============================================================================="
+    printf "%-24s %-29s\n" "" "CURRENT_IPv6: $CURRENT_IPv6"
+    echo "------------------------------------------------------------------------------"
+    printf "%-18s %-25s %-18s %-25s \n" "RECORD_IP_s1v6: " "$RECORD_IP_s1v6" "RECORD_IP_s2v6: " "$RECORD_IP_s2v6"
+    printf "%-18s %-25s %-18s %-25s \n" "RECORD_ID_s1v6: " "$RECORD_ID_s1v6" "RECORD_ID_s2v6: " "$RECORD_ID_s2v6"
+    printf "%-18s %-25s %-18s %-25s \n" "LINE_ID_s1v6: " "$LINE_ID_s1v6" "LINE_ID_s2v6: " "$LINE_ID_s2v6"
+    printf "%-18s %-25s %-18s %-25s \n" "STATUS_CODE_s1v6: " "$STATUS_CODE_s1v6" "STATUS_CODE_s2v6: " "$STATUS_CODE_s2v6"    
+    echo "=============================================================================="
     UpdateIPv6
 else
-    echo "IPv6 network is down,please check it."
+    echo -e "\nIPv6 network is down,please check it."
 fi
