@@ -36,10 +36,10 @@ DNSPOD_TOKEN="login_token=${API_ID},${API_Token}"
 date
 cd $(dirname $0)
 if type curl >/dev/null 2>&1; then
-    echo "curl 已安装"
+	echo "curl 已安装"
 else
-    echo "curl 未安装"
-    exit
+	echo "curl 未安装"
+	exit
 fi
 #=============== function ===============
 
@@ -118,12 +118,12 @@ GetWanIPv4() {
 }
 
 GetWanIPv6() {
-	IPv6REX='([a-f0-9]{1,4}(:[a-f0-9]{1,4}){7}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){0,7}::[a-f0-9]{0,4}(:[a-f0-9]{1,4}){0,7})'
-    #过滤 ::1 有序 IPv6
-	CURRENT_IPv6=$(ip -o -6 addr list | grep -Ev '\s(docker|lo)' | awk '{print $4}' | cut -d/ -f1 | grep '::1')
+	
+	CURRENT_IPv6=$(ip -o -6 addr list | grep -Ev '\s(docker|lo)' | awk '{print $4}' | cut -d/ -f1 | grep '2.*::1')
 
 	if [ -z "$CURRENT_IPv6" ]; then
 		echo "网卡未获取到公网 IPv6，开始通过访问公网 API 获取"
+        IPv6REX='([a-f0-9]{1,3}(:[a-f0-9]{1,4}){7}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){0,7}::[a-f0-9]{0,4}(:[a-f0-9]{1,4}){0,7})'
 		CURRENT_IPv6=$(curl -6 -k -s $CHECKURL_V6_1 | grep -Eo "$IPv6REX")
 
 		if test $CURRENT_IPv6; then
@@ -312,3 +312,4 @@ if [ $? -eq 0 ]; then
 else
 	echo -e "\nIPv6 network is down,please check it."
 fi
+
