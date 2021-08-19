@@ -3,7 +3,7 @@
 # Author: Toy
 #
 """
-<plugin key="Phicomm-M1" name="Phicomm M1 Receiver" author="Toy" version="0.0.1" wikilink="更新频率设置为0将不发送心跳，即5分钟更新一次" externallink="https://github.com/tanst/scripts/Phicomm-M1">
+<plugin key="Phicomm-M1" name="Phicomm M1 Receiver" author="Toy" version="0.0.1" wikilink="更新频率设置为0将不发送心跳，即5分钟更新一次" externallink="https://raw.githubusercontent.com/tanst/scripts/master/Phicomm-M1/plugin.py">
 	<params>
         <param field="Mode1" label="更新频率(秒)" width="30px" required="true" default="0"/>
     </params>
