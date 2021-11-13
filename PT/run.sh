@@ -46,7 +46,7 @@ clear_chinese_char() {
 
 		done
 		newPath=$(sed ':a;N;s/\/\n/\//g;ta' /dev/shm/TEST$$)
-		curl -s -k -G --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" "$HOST/api/v2/torrents/renameFile?hash=$HASH" --cookie "SID=$COOKIE"
+		curl -s -k --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" --data-urlencode "hash=$HASH"  "$HOST/api/v2/torrents/renameFile" --cookie "SID=$COOKIE"
 		echo "=============================="
 		echo "oldPath : $oldPath"
 		echo "newPath : $newPath"
@@ -78,7 +78,7 @@ add_senson() {
 
 		done
 		newPath=$(sed ':a;N;s/\/\n/\//g;ta' /dev/shm/TEST$$)
-		curl -s -k -G --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" "$HOST/api/v2/torrents/renameFile?hash=$HASH" --cookie "SID=$COOKIE"
+		curl -s -k --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" --data-urlencode "hash=$HASH"  "$HOST/api/v2/torrents/renameFile" --cookie "SID=$COOKIE"
 		echo "=============================="
 		echo "oldPath : $oldPath"
 		echo "newPath : $newPath"
@@ -99,3 +99,12 @@ fi
 if [ "${CATEGORY}" == "movie" ]; then
 	clear_chinese_char
 fi
+
+
+row_number=$(grep -c "" run.log)
+delete_number=$(expr $row_number - 500)
+if  [ ${delete_number} -gt 0 ]
+    then
+        sed -i "1,${delete_number}d" run.log
+fi
+
