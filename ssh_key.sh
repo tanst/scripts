@@ -8,17 +8,14 @@ apt-get install curl -y
 echo "PS1='\[\e[1;32;40m\][\u@\h - \t \W]\$ \[\e[0m\]'" >> ~/.bashrc
 echo "alias ll='ls --color=auto -l'" >> ~/.bashrc
 echo "alias ls='ls --color=auto'" >> ~/.bashrc
-mkdir ~/.ssh
+mkdir -P ~/.ssh
 curl -s https://github.com/tanst.keys > ~/.ssh/authorized_keys
 chmod 700 ~/.ssh/authorized_keys
 chmod 600 ~/.ssh
-sed -i "/PasswordAuthentication /c PasswordAuthentication no" /etc/ssh/sshd_config
-sed -i "/PubkeyAuthentication /c PubkeyAuthentication yes" /etc/ssh/sshd_config
-sed -i "/PrintMotd /c PrintMotd yes" /etc/ssh/sshd_config
-sed -i "/PrintLastLog /c PrintLastLog yes" /etc/ssh/sshd_config
-sed -i "/Port /c Port 43389" /etc/ssh/sshd_config
-service ssh restart
-systemctl restart ssh
+sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/g' /etc/ssh/sshd_config
+sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
+sed -i 's/^#\?PrintMotd.*/PrintMotd yes/g' /etc/ssh/sshd_config
+sed -i 's/^#\?PrintLastLog.*/PrintLastLog yes/g' /etc/ssh/sshd_config
+sed -i 's/^#\?Port.*/Port 43389/g' /etc/ssh/sshd_config
 service sshd restart
-systemctl restart sshd
 echo -e "Please enter \033[0;35msource ~/.bashrc\033[0m for immediate effect"
