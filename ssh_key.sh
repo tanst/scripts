@@ -17,5 +17,8 @@ sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/g' /etc/ssh/sshd_c
 sed -i 's/^#\?PrintMotd.*/PrintMotd yes/g' /etc/ssh/sshd_config
 sed -i 's/^#\?PrintLastLog.*/PrintLastLog yes/g' /etc/ssh/sshd_config
 sed -i 's/^#\?Port.*/Port 43389/g' /etc/ssh/sshd_config
+service ssh restart
+systemctl restart ssh
 service sshd restart
+systemctl restart sshd
 echo -e "Please enter \033[0;35msource ~/.bashrc\033[0m for immediate effect"
