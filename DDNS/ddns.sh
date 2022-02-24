@@ -81,7 +81,7 @@ GetWanIPv4() {
 
 	case $(uname) in
 	'Linux')
-		CURRENT_IPv4=$(ip -o -4 addr list | grep -Ev '\s(docker|lo)' | awk '{print $4}' | cut -d/ -f1 | grep -Ev "$lanIps" | head -n 1)
+		CURRENT_IPv4=$(ip -o -4 addr list | grep 'vwan1'| grep -Ev '\s(docker|lo)' | awk '{print $4}' | cut -d/ -f1 | grep -Ev "$lanIps" | head -n 1)
 		;;
 	'Darwin')
 		CURRENT_IPv4=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | grep -Ev "$lanIps")
@@ -119,8 +119,7 @@ GetWanIPv4() {
 
 GetWanIPv6() {
 	
-	CURRENT_IPv6=$(ip -o -6 addr list | grep -Ev '\s(docker|lo)' | awk '{print $4}' | cut -d/ -f1 | grep '2.*::1')
-
+    CURRENT_IPv6=$(ip -o -6 addr list | grep -Ev '\s(docker|lo)' | awk '{print $4}' | cut -d/ -f1 | grep ^2 | grep ::1$ | sed -n '1,1p')
 	if [ -z "$CURRENT_IPv6" ]; then
 		echo "网卡未获取到公网 IPv6，开始通过访问公网 API 获取"
         IPv6REX='([a-f0-9]{1,3}(:[a-f0-9]{1,4}){7}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){0,7}::[a-f0-9]{0,4}(:[a-f0-9]{1,4}){0,7})'
@@ -132,14 +131,14 @@ GetWanIPv6() {
 			echo "error: $CHECKURL_V6_1 获取公网IPv6错误，请检查URL是否正常"
 			CURRENT_IPv6=$(curl -6 -k -s $CHECKURL_V6_2 | grep -Eo "$IPv6REX" | sed -nr "$SEDREX")
 			#改成群晖 IPv6
-			CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/::5/')
+			CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/:7285:c2ff:fe58:11b6/')
 			if test $CURRENT_IPv6; then
 				echo "succeeded: $CHECKURL_V6_2 获取公网IPv6正常"
 			else
 				echo "error: $CHECKURL_V6_2 获取公网IPv6错误，请检查URL是否正常"
 				CURRENT_IPv6=$(curl -6 -k -s $CHECKURL_V6_3 | grep -Eo "$IPv6REX" | sed -nr "$SEDREX")
 				#改成群晖 IPv6
-				CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/::5/')
+				CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/:7285:c2ff:fe58:11b6/')
 				if test $CURRENT_IPv6; then
 					echo "succeeded: $CHECKURL_V6_3 获取公网IPv6正常"
 				else
@@ -153,7 +152,7 @@ GetWanIPv6() {
 	fi
 
 	#改成群晖 IPv6
-	CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/::5/')
+	CURRENT_IPv6=$(echo "${CURRENT_IPv6}" | sed 's/::1/:7285:c2ff:fe58:11b6/')
 
 }
 
@@ -277,7 +276,7 @@ UpdateIPv6() {
 
 checkhost=checkip.dns.he.net
 
-ping -4 -c2 $checkhost >>/dev/null 2>&1
+ping -4 -c2 223.6.6.6 >>/dev/null 2>&1
 if [ $? -eq 0 ]; then
 	echo -e "\nIPv4 network is ok."
 	GetWanIPv4
@@ -295,7 +294,7 @@ else
 	echo -e "\nIPv4 network is down,please check it."
 fi
 
-ping -6 -c2 $checkhost >>/dev/null 2>&1
+ping -6 -c2 2400:3200::1 >>/dev/null 2>&1
 if [ $? -eq 0 ]; then
 	echo -e "\nIPv6 network is ok."
 	GetWanIPv6
@@ -312,4 +311,3 @@ if [ $? -eq 0 ]; then
 else
 	echo -e "\nIPv6 network is down,please check it."
 fi
-
