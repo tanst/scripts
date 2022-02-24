@@ -76,7 +76,7 @@ send_wechat() {
       "contentType":1,
       "uids":["'$WCuids'"]
     }'
-	curl -k http://wxpusher.zjiecode.com/api/send/message -X POST -H "Content-Type: application/json" -d "${JSON}"
+	curl -s -k http://wxpusher.zjiecode.com/api/send/message -X POST -H "Content-Type: application/json" -d "${JSON}"
 }
 
 GetZoneID() {
@@ -291,7 +291,7 @@ UpdateIPv6() {
 			curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
 				-H "Authorization: Bearer $DDNS_API" \
 				-H "Content-Type: application/json" \
-				--data "{\"type\":\"A\",\"name\":\"${DOMAIN_sub}\",\"content\":\"$ip\",\"ttl\":1}"
+				--data "{\"type\":\"AAAA\",\"name\":\"${DOMAIN_sub}\",\"content\":\"$ip\",\"ttl\":1}"
 		done
 		NewIP=$(echo "${Home_IPv6}" | sed ':label;N;s/\n/\\n/;b label')
 		echo -e "\nNewIPv6:$DOMAIN_sub: \n$NewIP"
