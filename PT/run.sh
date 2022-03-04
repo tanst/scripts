@@ -121,34 +121,36 @@ fi
 
 files_no=0
 for oldPath in ${FILES_NAME}; do
-      files_no=$(($files_no + 1))
-      ## 判断分类 ##
-      if [[ ! -z $(echo "${CATEGORY_ARRAY_S[@]}" | grep -E "${CATEGORY}") ]]; then
-            se="$(echo ${oldPath} | grep -iE s[0-9]\{1,2\}ep\?[0-9]\{1,2\})"
-            if test -z "$se"; then
-                  SPath=$(echo "${oldPath}" | sed 's/ep\?\([0-9]\{1,2\}\)/S01E\1/gi')
-            fi
+    files_no=$(($files_no + 1))
+    ## 判断分类 ##
+    if [[ ! -z $(echo "${CATEGORY_ARRAY_S[@]}" | grep -E "${CATEGORY}") ]]; then
+        se="$(echo ${oldPath} | grep -iE s[0-9]\{1,2\}ep\?[0-9]\{1,2\})"
+        if test -z "$se"; then                                                  # 如果没有 s01
+            SPath=$(echo "${oldPath}" | sed 's/ep\?\([0-9]\{1,2\}\)/S01E\1/gi') # 添加 S01
             fen=$(echo ${SPath} | sed 's/ /\./g')
-      else
+        else
             fen=$(echo ${oldPath} | sed 's/ /\./g')
-      fi
+        fi
+    else
+        fen=$(echo ${oldPath} | sed 's/ /\./g')
+    fi
 
-      fen1=$(echo $fen | sed 's/\(.[^/]*\/\).*/\1/')
-      fen2=$(echo $fen | sed 's/.[^/]*\/\(.*\)/\1/')
+    fen1=$(echo $fen | sed 's/\(.[^/]*\/\).*/\1/')
+    fen2=$(echo $fen | sed 's/.[^/]*\/\(.*\)/\1/')
 
-      name=$fen1
-      name_year
-      newPath=$finale_name$fen2
+    name=$fen1
+    name_year
+    newPath=$finale_name$fen2
 
-      curl -s -k --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" --data-urlencode "hash=$HASH" "$HOST/api/v2/torrents/renameFile" --cookie "SID=$COOKIE"
-      echo "=========文件$files_no================"
-      echo "oldPath : $oldPath"
-      echo "newPath : $newPath"
+    curl -s -k --data-urlencode "oldPath=$oldPath" --data-urlencode "newPath=$newPath" --data-urlencode "hash=$HASH" "$HOST/api/v2/torrents/renameFile" --cookie "SID=$COOKIE"
+    echo "=========文件$files_no================"
+    echo "oldPath : $oldPath"
+    echo "newPath : $newPath"
 
 done
 
 row_number=$(grep -c "" run.log)
 delete_number=$(expr $row_number - 500)
 if [ ${delete_number} -gt 0 ]; then
-      sed -i "1,${delete_number}d" run.log
+    sed -i "1,${delete_number}d" run.log
 fi
