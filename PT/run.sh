@@ -113,7 +113,7 @@ if [ -z "$(echo "${FILES_NAME}" | grep -E '/')" ]; then
 fi
 
 ## 判断分类 ##
-if [[ -z $(echo "${CATEGORY_ARRAY[@]}" | grep -E "${CATEGORY}") ]]; then
+if [[ -z $(echo "${CATEGORY_ARRAY[@]}" | grep -E "${CATEGORY}") ]] || [[ ${CATEGORY} == "" ]]; then
       echo "分类：${CATEGORY}"
       echo "不在处理分类中，跳过"
       exit
