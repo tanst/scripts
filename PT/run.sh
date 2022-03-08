@@ -70,14 +70,14 @@ TORRENT_SAVE_PATH="$(echo "${TORRENT_INFO}" | sed 's/.*"save_path":"\([^"]*\)".*
 DELETE_HASHES="$(curl -s -k "${HOST}/api/v2/torrents/info" --cookie "SID=$COOKIE" | sed "s/},{/}\n{/g" | grep missingFiles | sed "s/.*\"hash\":\"\(.*\)\",\"last_activity\".*/\1/" | sed ":a;N;s/\n/|/g;ta")"
 curl -s -k "${HOST}/api/v2/torrents/delete?hashes=${DELETE_HASHES}&deleteFiles=true" --cookie "SID=$COOKIE"
 
-echo "++++++++++种子信息++++++++++"
-echo ""
-echo $(echo '[' && date "+%Y-%m-%d %H:%M:%S" && echo ']')
-echo "${TORRENT_NAME}"
-echo "${HASH}"
-echo "${TORRENT_SAVE_PATH}"
-echo ""
-echo "++++++++++++++++++++++++++++++++++++++++"
+echo "#-------------------种子信息----------------"
+echo "# "
+echo $(echo '# ['&&date "+%Y-%m-%d %H:%M:%S"&&echo ']')
+echo "# 种子名字：${TORRENT_NAME}"
+echo "# HASH：${HASH}"
+echo "# 保存路径：${TORRENT_SAVE_PATH}"
+echo "# 分类：${CATEGORY}"
+echo "# -------------------------------------------"
 
 name_year() {
 
@@ -87,11 +87,11 @@ name_year() {
             first_name=$(echo "$name" | sed 's/\(.*\.[0-9]\{4\}\)\..*/\1/g')
             result=$(echo "$first_name" | grep '[^A-Za-z0-9 -/@_&￡]')
             if [[ "$result" != "" ]]; then
-                  echo "包含"
+                #   echo "包含中文"
                   first_name=$(echo "$first_name" | sed 's/\./\n/g' | grep '[^A-Za-z0-9 -/@_&￡]' | sed ':a;N;s/\n/./g;ta')
             else
-                  echo "不包含"
-                  echo "$first_name"
+                #   echo "不包含中文"
+                #   echo "$first_name"
                   first_name=$(echo "$first_name" | sed 's/\(.*\)\.[0-9]\{4\}/\1/g')
             fi
             finale_name=$first_name"("$year")""-"$name
