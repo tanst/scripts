@@ -29,7 +29,7 @@ CATEGORY_ARRAY_S = ['TV']
 
 
 def print_log(log_file, txt):
-    log_file = r"D:\tmp\log.txt"  # 日志
+    log_file = r"/config/log.txt"  # 日志
     print(txt)
     txt = '%s\t%s\n' % (time.strftime('%Y/%m/%d %H:%M:%S',
                         time.localtime(time.time())), str(txt))
@@ -74,23 +74,29 @@ for torrent in client.torrents_info(torrent_hashes=HASH):
         print_log(0, f'退出。不在分类中：名字：{torrent.name} 分类：{torrent.category}')
         exit()
 
-    files_no = 0
-    for torrent_file in client.torrents_files(torrent_hash=HASH):
-        files_no = files_no + 1
-        print_log(0, f'文件{files_no} 名字：{torrent.name} 分类：{torrent.category}')
-        if torrent.category in CATEGORY_ARRAY_S:
-            # 添加 S01 的分类
+    if torrent.category in CATEGORY_ARRAY_S:
+        files_no = 0
+        for torrent_file in client.torrents_files(torrent_hash=HASH):
+            files_no = files_no + 1
+            print_log(0, f'文件{files_no} 名字：{torrent.name} 分类：{torrent.category}')
             for oldPath in torrent_file.name.splitlines():
                 if not re.search(r's[0-9]{1,2}ep?[0-9]{1,2}', oldPath, flags=re.I):
-                    path = re.sub(r'ep?([0-9]{1,2})',
-                                  'S01E\g<1>', oldPath, flags=re.I)
+                    path = re.sub(r'ep?([0-9]{1,2})', 'S01E\g<1>', oldPath, flags=re.I)
                 else:
                     path = oldPath
-        else:
+                newPath = year(path)
+                client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+                print_log(0, f'oldPath: {oldPath}')
+                print_log(0, f'newPath: {newPath}')
+    else:
+        for torrent_file in client.torrents_files(torrent_hash=HASH):
+            oldPath = torrent_file.name.splitlines()[0]
             path = oldPath
-        # 重命名根目录
-        newPath = year(path)
-        client.torrents_rename_file(
-            torrent_hash=HASH, old_path=oldPath, new_path=newPath)
-        print_log(0, f'oldPath: {oldPath}')
-        print_log(0, f'newPath: {newPath}')
+            newPath = year(path)
+            oldPath = oldPath.split("/", 1)[0]
+            newPath = newPath.split("/", 1)[0]
+            client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+            print_log(0, f'oldPath: {oldPath}')
+            print_log(0, f'newPath: {newPath}')
+            break
+
