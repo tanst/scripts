@@ -62,41 +62,40 @@ for torrent in client.torrents_info():
 
 HASH = sys.argv[1]
 
-for torrent in client.torrents_info(torrent_hashes=HASH):
+torrent = client.torrents.info(torrent_hashes=HASH)[0]
 
-    print_log(0, '-------------------------------------')
-    print_log(0, '\n')
-    print_log(0, f'         {torrent.name}')
-    print_log(0, '\n')
-    print_log(0, '-------------------------------------')
-    # 不在分类中的退出
-    if torrent.category not in CATEGORY_ARRAY:
-        print_log(0, f'退出。不在分类中：名字：{torrent.name} 分类：{torrent.category}')
-        exit()
-
-    if torrent.category in CATEGORY_ARRAY_S:
-        files_no = 0
-        for torrent_file in client.torrents_files(torrent_hash=HASH):
-            files_no = files_no + 1
-            print_log(0, f'文件{files_no} 名字：{torrent.name} 分类：{torrent.category}')
-            for oldPath in torrent_file.name.splitlines():
-                if not re.search(r's[0-9]{1,2}ep?[0-9]{1,2}', oldPath, flags=re.I):
-                    path = re.sub(r'ep?([0-9]{1,2})', 'S01E\g<1>', oldPath, flags=re.I)
-                else:
-                    path = oldPath
-                newPath = year(path)
-                client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
-                print_log(0, f'oldPath: {oldPath}')
-                print_log(0, f'newPath: {newPath}')
-    else:
-        for torrent_file in client.torrents_files(torrent_hash=HASH):
-            oldPath = torrent_file.name.splitlines()[0]
-            path = oldPath
+print_log(0, '-------------------------------------')
+print_log(0, '\n')
+print_log(0, f'         {torrent.name}')
+print_log(0, '\n')
+print_log(0, '-------------------------------------')
+# 不在分类中的退出
+if torrent.category not in CATEGORY_ARRAY:
+    print_log(0, f'退出。不在分类中：名字：{torrent.name} 分类：{torrent.category}')
+    exit()
+if torrent.category in CATEGORY_ARRAY_S:
+    files_no = 0
+    for torrent_file in torrent.files:
+        files_no = files_no + 1
+        print_log(0, f'文件{files_no} 名字：{torrent.name} 分类：{torrent.category}')
+        for oldPath in torrent_file.name.splitlines():
+            if not re.search(r's[0-9]{1,2}ep?[0-9]{1,2}', oldPath, flags=re.I):
+                path = re.sub(r'ep?([0-9]{1,2})', 'S01E\g<1>', oldPath, flags=re.I)
+            else:
+                path = oldPath
             newPath = year(path)
-            oldPath = oldPath.split("/", 1)[0]
-            newPath = newPath.split("/", 1)[0]
-            client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+            client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
             print_log(0, f'oldPath: {oldPath}')
             print_log(0, f'newPath: {newPath}')
-            break
+else:
+    for torrent_file in torrent.files:
+        oldPath = torrent_file.name.splitlines()[0]
+        path = oldPath
+        newPath = year(path)
+        oldPath = oldPath.split("/", 1)[0]
+        newPath = newPath.split("/", 1)[0]
+        client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+        print_log(0, f'oldPath: {oldPath}')
+        print_log(0, f'newPath: {newPath}')
+        break
 
