@@ -21,8 +21,7 @@ import time
 
 client = Client(host='127.0.0.1:8080', username='admin', password='adminadmin')
 
-## 总分类（其余不处理） ##
-CATEGORY_ARRAY = ['TV', 'movie']
+CATEGORY_ARRAY = ['TV', 'movie', 'rss_movie']
 
 ## 添加S01分类 ##
 CATEGORY_ARRAY_S = ['TV']
@@ -99,3 +98,24 @@ else:
         print_log(0, f'newPath: {newPath}')
         break
 
+def logcut(logfile, num):
+    f = open(logfile , "r", encoding='utf-8')
+    count = len(f.readlines())
+    f.close()
+    if count > num:
+        with open(logfile, encoding='utf-8') as f:
+            lines = f.readlines()
+
+        def remove_comments(lines):
+            return [line for line in lines if line.startswith("#") == False]
+
+        def remove_n_line(lines, n):
+            return lines[n if n<= len(lines) else 0:]
+
+        lines = remove_n_line(lines, count - num)
+
+        f = open(logfile, "w", encoding='utf-8') # save on new_file
+        f.writelines(lines)
+        f.close()
+    return
+logcut('/config/log.txt', 1000) # 仅保留 1000 行日志
