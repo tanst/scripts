@@ -88,6 +88,7 @@ if parse(torrent.name).get('zhTitle'):
     media_info_title = parse(torrent.name).get('zhTitle')
 else:
     media_info_title = parse(torrent.name).get('enTitle')
+    media_info_title = re.sub(r'\WS\d{2}', '', media_info_title, flags=re.I)
 
 # 搜索 TMDB 信息
 # 发送图文消息
