@@ -148,7 +148,9 @@ if torrent.category in CATEGORY_MOVIE:
         genre_movie = json.loads(response.text)
         genre_ids = ','.join([x['name'] for x in genre_movie["genres"] if x['id'] in res.genre_ids])
         num = res.vote_average
-        if num <= 2.5:
+        if num <= 1:
+            vote_average = '☆☆☆☆☆'
+        elif num > 1 and num <= 2.5:
             vote_average = '★☆☆☆☆'
         elif num > 2.5 and num <= 4.5:
             vote_average = '★★☆☆☆'
@@ -184,7 +186,9 @@ if torrent.category in CATEGORY_TV:
         genre_tv = json.loads(response.text)
         genre_ids = ','.join([x['name'] for x in genre_tv["genres"] if x['id'] in res.genre_ids])
         num = res.vote_average
-        if num <= 2.5:
+        if num <= 1:
+            vote_average = '☆☆☆☆☆'
+        elif num > 1 and num <= 2.5:
             vote_average = '★☆☆☆☆'
         elif num > 2.5 and num <= 4.5:
             vote_average = '★★☆☆☆'
@@ -240,7 +244,7 @@ if torrent.category in CATEGORY_TV:
             else:
                 path = oldPath
             newPath = year(path)
-            # client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+            client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
             print_log(logfile, f'oldPath: {oldPath}')
             print_log(logfile, f'newPath: {newPath}')
 else:
@@ -250,7 +254,7 @@ else:
         newPath = year(path)
         oldPath = oldPath.split("/", 1)[0]
         newPath = newPath.split("/", 1)[0]
-        # client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+        client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
         print_log(logfile, f'oldPath: {oldPath}')
         print_log(logfile, f'newPath: {newPath}')
         break
