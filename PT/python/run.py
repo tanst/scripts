@@ -46,6 +46,7 @@ __agent_id = '1000000'
 send_user = 'admin'
 
 #====================== 配置结束 ================================
+
 client = Client(host=host, username=username, password=password)
 def print_log(log_file, txt): 
     print(txt)
@@ -55,17 +56,41 @@ def print_log(log_file, txt):
     f.write(txt)
     f.close()
 
+def logcut(log_file, num):
+    f = open(log_file , "r", encoding='utf-8')
+    count = len(f.readlines())
+    f.close()
+    if count > num:
+        with open(log_file, encoding='utf-8') as f:
+            lines = f.readlines()
+
+        def remove_comments(lines):
+            return [line for line in lines if line.startswith("#") == False]
+
+        def remove_n_line(lines, n):
+            return lines[n if n<= len(lines) else 0:]
+
+        lines = remove_n_line(lines, count - num)
+
+        f = open(log_file, "w", encoding='utf-8') # save on new_file
+        f.writelines(lines)
+        f.close()
+    return
+
 def year(path):
     root_path = path.split("/", 1)
-    if parse(root_path[0]).get('year'):
-        if parse(root_path[0]).get('zhTitle'):
-            title = parse(root_path[0]).get('zhTitle')
-        else:
-            title = parse(root_path[0]).get('enTitle')
-        years = parse(root_path[0]).get('year')
-        newPath = f'{title}({years})-{root_path[0]}/{root_path[1]}'
+    if tmdb_title:
+        newPath = f'{tmdb_title}({tmdb_year})-{root_path[0]}/{root_path[1]}'
     else:
-        newPath = path
+        if parse(root_path[0]).get('year'):
+            if parse(root_path[0]).get('zhTitle'):
+                title = parse(root_path[0]).get('zhTitle')
+            else:
+                title = parse(root_path[0]).get('enTitle')
+            years = parse(root_path[0]).get('year')
+            newPath = f'{title}({years})-{root_path[0]}/{root_path[1]}'
+        else:
+            newPath = path
     return newPath
 
 # 删除文件不存在种子
@@ -133,9 +158,9 @@ def send_image_message(title, text, image_url, media_url):
             return False, None
     except Exception as err:
         return False, str(err)
+ 
 
-
-tmdb_info_title = tmdb_info_text  = num = vote_average = res_overview = None
+num = vote_average = tmdb_overview = tmdb_title = tmdb_genre =None
 
 if torrent.category in CATEGORY_MOVIE:
     if media_info_year is not None:
@@ -146,7 +171,7 @@ if torrent.category in CATEGORY_MOVIE:
         res = search[0]
         response = requests.get('https://api.themoviedb.org/3/genre/movie/list?api_key=%s&language=%s' % (tmdb.api_key, tmdb.language))
         genre_movie = json.loads(response.text)
-        genre_ids = ','.join([x['name'] for x in genre_movie["genres"] if x['id'] in res.genre_ids])
+        tmdb_genre = ','.join([x['name'] for x in genre_movie["genres"] if x['id'] in res.genre_ids])
         num = res.vote_average
         if num <= 1:
             vote_average = '☆☆☆☆☆'
@@ -164,16 +189,16 @@ if torrent.category in CATEGORY_MOVIE:
             image_path = res.backdrop_path
         else:
             image_path = res.poster_path
-        movie_title = '%s(%s) %s' % (res.title, media_info_year, genre_ids)
-        movie_text = '评分：%s %s\n%s' % (num, vote_average, res.overview)
-        movie_image_url = "https://image.tmdb.org/t/p/w780%s" % image_path
-        movie_media_url ="https://www.themoviedb.org/movie/%s" %res.id
-        send_image_message(movie_title, movie_text, movie_image_url, movie_media_url)
-        tmdb_info_title = movie_title
-        tmdb_info_text = movie_text
-        res_overview = res.overview
+        tmdb_title = res.title
+        tmdb_year = re.search('\d{4}', res.release_date).group(0)
+        tmdb_image_url = "https://image.tmdb.org/t/p/w780%s" % image_path
+        tmdb_url ="https://www.themoviedb.org/movie/%s" %res.id
+        send_image_message('%s(%s) %s' % (res.title, tmdb_year, tmdb_genre), '评分：%s %s\n%s' % (num, vote_average, res.overview), tmdb_image_url, tmdb_url)
+
+
+        tmdb_overview = res.overview
     else:
-        print_log(logfile, f'抱歉，没有在 TMDB 搜索到信息')
+        print_log(logfile, f'抱歉，没有在 TMDB 搜索到 "{media_info_title}" 的信息')
 
 if torrent.category in CATEGORY_TV:
     if media_info_year is not None: 
@@ -184,7 +209,7 @@ if torrent.category in CATEGORY_TV:
         res = search[0]
         response = requests.get('https://api.themoviedb.org/3/genre/tv/list?api_key=%s&language=%s' % (tmdb.api_key, tmdb.language))
         genre_tv = json.loads(response.text)
-        genre_ids = ','.join([x['name'] for x in genre_tv["genres"] if x['id'] in res.genre_ids])
+        tmdb_genre = ','.join([x['name'] for x in genre_tv["genres"] if x['id'] in res.genre_ids])
         num = res.vote_average
         if num <= 1:
             vote_average = '☆☆☆☆☆'
@@ -202,27 +227,26 @@ if torrent.category in CATEGORY_TV:
             image_path = res.backdrop_path
         else:
             image_path = res.poster_path
-        tv_title = '%s(%s) %s' % (res.name, media_info_year, genre_ids)
-        tv_text = '评分：%s %s\n%s' % (num, vote_average, res.overview)
-        tv_image_url = "https://image.tmdb.org/t/p/w780%s" % image_path
-        tv_media_url = "https://www.themoviedb.org/tv/%s" %res.id
-        send_image_message(tv_title, tv_text, tv_image_url, tv_media_url)
-        tmdb_info_title = tv_title
-        tmdb_info_text = tv_text
-        res_overview = res.overview
+        tmdb_title = res.name
+        tmdb_year = re.search('\d{4}', res.first_air_date).group(0)
+        tmdb_image_url = "https://image.tmdb.org/t/p/w780%s" % image_path
+        tmdb_url = "https://www.themoviedb.org/tv/%s" %res.id
+        send_image_message('%s(%s) %s' % (res.name, tmdb_year, tmdb_genre), '评分：%s %s\n%s' % (num, vote_average, res.overview), tmdb_image_url, tmdb_url)
+
+        tmdb_overview = res.overview
     else:
-        print_log(logfile, f'抱歉，没有在 TMDB 搜索到信息')
+        print_log(logfile, f'抱歉，没有在 TMDB 搜索到 "{media_info_title}" 的信息')
 
 
 print_log(logfile, '-------------------------------------')
 print_log(logfile, '')
-print_log(logfile, f'         名字：{media_info_title}')
-print_log(logfile, f'         年份：{media_info_year}')
+print_log(logfile, f'         种子名字：{torrent.name}')
 print_log(logfile, f'         分类：{torrent.category}')
 print_log(logfile, '          ~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-print_log(logfile, f'         TMDB 标题：{tmdb_info_title}')
+print_log(logfile, f'         TMDB 标题：{tmdb_title}({tmdb_year})')
+print_log(logfile, f'         TMDB 类型：{tmdb_genre}')
 print_log(logfile, f'         TMDB 评分：{num} {vote_average}')
-print_log(logfile, f'         TMDB 简介：{res_overview}')
+print_log(logfile, f'         TMDB 简介：{tmdb_overview}')
 print_log(logfile, '')
 print_log(logfile, '-------------------------------------')
 
@@ -245,8 +269,11 @@ if torrent.category in CATEGORY_TV:
                 path = oldPath
             newPath = year(path)
             client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+
             print_log(logfile, f'oldPath: {oldPath}')
             print_log(logfile, f'newPath: {newPath}')
+            newPath = newPath.split("/", 1)[0]
+            client.torrents_rename(torrent_hash=HASH, new_torrent_name=newPath)
 else:
     for torrent_file in torrent.files:
         oldPath = torrent_file.name.splitlines()[0]
@@ -257,26 +284,7 @@ else:
         client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
         print_log(logfile, f'oldPath: {oldPath}')
         print_log(logfile, f'newPath: {newPath}')
+        client.torrents_rename(torrent_hash=HASH, new_torrent_name=newPath)
         break
 
-def logcut(log_file, num):
-    f = open(log_file , "r", encoding='utf-8')
-    count = len(f.readlines())
-    f.close()
-    if count > num:
-        with open(log_file, encoding='utf-8') as f:
-            lines = f.readlines()
-
-        def remove_comments(lines):
-            return [line for line in lines if line.startswith("#") == False]
-
-        def remove_n_line(lines, n):
-            return lines[n if n<= len(lines) else 0:]
-
-        lines = remove_n_line(lines, count - num)
-
-        f = open(log_file, "w", encoding='utf-8') # save on new_file
-        f.writelines(lines)
-        f.close()
-    return
 logcut(logfile, 1000) # 仅保留 1000 行日志
