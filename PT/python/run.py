@@ -93,29 +93,6 @@ def year(path):
             newPath = path
     return newPath
 
-# 删除文件不存在种子
-for torrent in client.torrents_info():
-    if torrent.state == 'missingFiles':
-        print_log(logfile, f'已删除：{torrent.state}:{torrent.name}[{torrent.category}]')
-        client.torrents_delete(delete_files=True, torrent_hashes=torrent.hash)
-    # print_log(logfile, f'状态：{torrent.state}\n名字：{torrent.name}\n分类：{torrent.category}')
-
-HASH = sys.argv[1]
-
-torrent = client.torrents.info(torrent_hashes=HASH)[0]
-
-# 获取 名字、年份、类型
-if parse(torrent.name).get('year'):
-    media_info_year = parse(torrent.name).get('year')
-else:
-    media_info_year = None
-if parse(torrent.name).get('zhTitle'):
-    media_info_title = parse(torrent.name).get('zhTitle')
-else:
-    media_info_title = parse(torrent.name).get('enTitle')
-    media_info_title = re.sub(r'\WS\d{2}', '', media_info_title, flags=re.I)
-
-# 搜索 TMDB 信息
 # 发送图文消息
 def send_image_message(title, text, image_url, media_url):
     
@@ -158,9 +135,43 @@ def send_image_message(title, text, image_url, media_url):
             return False, None
     except Exception as err:
         return False, str(err)
- 
 
-num = vote_average = tmdb_overview = tmdb_title = tmdb_genre =None
+# 删除文件不存在种子
+for torrent in client.torrents_info():
+    if torrent.state == 'missingFiles':
+        print_log(logfile, f'已删除：{torrent.state}:{torrent.name}[{torrent.category}]')
+        client.torrents_delete(delete_files=True, torrent_hashes=torrent.hash)
+    # print_log(logfile, f'状态：{torrent.state}\n名字：{torrent.name}\n分类：{torrent.category}')
+
+HASH = sys.argv[1]
+
+torrent = client.torrents.info(torrent_hashes=HASH)[0]
+
+# 不在分类中的退出
+CATEGORY_ALL = list(filter(None, CATEGORY_TV + CATEGORY_MOVIE + CATEGORY_OTHER))
+if torrent.category not in CATEGORY_ALL:
+    print_log(logfile, f'退出。不在分类中：名字：{torrent.name} 分类：{torrent.category}')
+    exit()
+
+# 获取 名字、年份、类型
+if parse(torrent.name).get('year'):
+    media_info_year = parse(torrent.name).get('year')
+else:
+    media_info_year = None
+if parse(torrent.name).get('zhTitle'):
+    media_info_title = parse(torrent.name).get('zhTitle')
+else:
+    media_info_title = parse(torrent.name).get('enTitle')
+    media_info_title = re.sub(r'\WS\d{2}', '', media_info_title, flags=re.I)
+
+# 搜索 TMDB 信息
+
+num = None
+vote_average = None
+tmdb_overview = None
+tmdb_title = None
+tmdb_genre = None
+tmdb_year = None
 
 if torrent.category in CATEGORY_MOVIE:
     if media_info_year is not None:
@@ -193,9 +204,6 @@ if torrent.category in CATEGORY_MOVIE:
         tmdb_year = re.search('\d{4}', res.release_date).group(0)
         tmdb_image_url = "https://image.tmdb.org/t/p/w780%s" % image_path
         tmdb_url ="https://www.themoviedb.org/movie/%s" %res.id
-        send_image_message('%s(%s) %s' % (res.title, tmdb_year, tmdb_genre), '评分：%s %s\n%s' % (num, vote_average, res.overview), tmdb_image_url, tmdb_url)
-
-
         tmdb_overview = res.overview
     else:
         print_log(logfile, f'抱歉，没有在 TMDB 搜索到 "{media_info_title}" 的信息')
@@ -231,8 +239,6 @@ if torrent.category in CATEGORY_TV:
         tmdb_year = re.search('\d{4}', res.first_air_date).group(0)
         tmdb_image_url = "https://image.tmdb.org/t/p/w780%s" % image_path
         tmdb_url = "https://www.themoviedb.org/tv/%s" %res.id
-        send_image_message('%s(%s) %s' % (res.name, tmdb_year, tmdb_genre), '评分：%s %s\n%s' % (num, vote_average, res.overview), tmdb_image_url, tmdb_url)
-
         tmdb_overview = res.overview
     else:
         print_log(logfile, f'抱歉，没有在 TMDB 搜索到 "{media_info_title}" 的信息')
@@ -242,39 +248,49 @@ print_log(logfile, '-------------------------------------')
 print_log(logfile, '')
 print_log(logfile, f'         种子名字：{torrent.name}')
 print_log(logfile, f'         分类：{torrent.category}')
-print_log(logfile, '          ~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-print_log(logfile, f'         TMDB 标题：{tmdb_title}({tmdb_year})')
-print_log(logfile, f'         TMDB 类型：{tmdb_genre}')
-print_log(logfile, f'         TMDB 评分：{num} {vote_average}')
-print_log(logfile, f'         TMDB 简介：{tmdb_overview}')
+if tmdb_title:
+    print_log(logfile, '          ~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print_log(logfile, f'         TMDB 标题：{tmdb_title}({tmdb_year})')
+    print_log(logfile, f'         TMDB 类型：{tmdb_genre}')
+    print_log(logfile, f'         TMDB 评分：{num} {vote_average}')
+    print_log(logfile, f'         TMDB 简介：{tmdb_overview}')
 print_log(logfile, '')
 print_log(logfile, '-------------------------------------')
 
-# 不在分类中的退出
-CATEGORY_ALL = list(filter(None, CATEGORY_TV + CATEGORY_MOVIE + CATEGORY_OTHER))
-if torrent.category not in CATEGORY_ALL:
-    print_log(logfile, f'退出。不在分类中：名字：{torrent.name} 分类：{torrent.category}')
-    exit()
 
 # 改名
 if torrent.category in CATEGORY_TV:
     files_no = 0
+    season = []
+    episode = []
     for torrent_file in torrent.files:
+        oldPath = torrent_file.name
         files_no = files_no + 1
         print_log(logfile, f'文件{files_no} 名字：{torrent.name} 分类：{torrent.category}')
-        for oldPath in torrent_file.name.splitlines():
-            if not re.search(r's[0-9]{1,2}ep?[0-9]{1,2}', oldPath, flags=re.I):
-                path = re.sub(r'ep?([0-9]{1,2})', 'S01E\g<1>', oldPath, flags=re.I)
-            else:
-                path = oldPath
-            newPath = year(path)
-            client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+        if not re.search(r's[0-9]{1,2}ep?[0-9]{1,2}', oldPath, flags=re.I):
+            path = re.sub(r'ep?([0-9]{1,2})', 'S01E\g<1>', oldPath, flags=re.I)
+        else:
+            path = oldPath
+        newPath = year(path)
+        client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
 
-            print_log(logfile, f'oldPath: {oldPath}')
-            print_log(logfile, f'newPath: {newPath}')
-            newPath = newPath.split("/", 1)[0]
-            client.torrents_rename(torrent_hash=HASH, new_torrent_name=newPath)
+        print_log(logfile, f'oldPath: {oldPath}')
+        print_log(logfile, f'newPath: {newPath}')
+        se = re.search(r's([0-9]{1,2})ep?([0-9]{1,2})', newPath, flags=re.I)
+        if se:
+            season.append(se.group(1))
+            episode.append(se.group(2))
+        else:
+            break
+    season = ','.join(map(str, list(set([ int(x) for x in season ]))))
+    episode = ','.join(map(str, list(set([ int(x) for x in episode ]))))
+    new_torrent_name = newPath.split("/", 1)[0]
+    client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
+    if tmdb_title:
+        send_image_message('%s(%s) %s' % (tmdb_title, tmdb_year, tmdb_genre), '第 %s 季，第 %s 集\n评分：%s %s\n%s' % (season, episode, num, vote_average, res.overview), tmdb_image_url, tmdb_url)
 else:
+    if tmdb_title:
+        send_image_message('%s(%s) %s' % (tmdb_title, tmdb_year, tmdb_genre), '评分：%s %s\n%s' % (num, vote_average, res.overview), tmdb_image_url, tmdb_url)
     for torrent_file in torrent.files:
         oldPath = torrent_file.name.splitlines()[0]
         path = oldPath
@@ -284,7 +300,7 @@ else:
         client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
         print_log(logfile, f'oldPath: {oldPath}')
         print_log(logfile, f'newPath: {newPath}')
-        client.torrents_rename(torrent_hash=HASH, new_torrent_name=newPath)
+        new_torrent_name = newPath
+        client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
         break
-
 logcut(logfile, 1000) # 仅保留 1000 行日志
