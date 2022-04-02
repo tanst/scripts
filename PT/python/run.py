@@ -136,6 +136,44 @@ def send_image_message(title, text, image_url, media_url):
     except Exception as err:
         return False, str(err)
 
+# 发送文本卡片消息
+def send_textcard_message(title, description):
+    
+    token_url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=%s&corpsecret=%s" % (__corpid, __corpsecret)
+    res = requests.get(token_url)
+    if res:
+        ret_json = res.json()
+        if ret_json['errcode'] == 0:
+            __access_token = ret_json['access_token']
+
+    message_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=%s' % __access_token
+    res = requests.get(token_url)
+    if description:
+        description = description.replace("\n\n", "\n")
+    req_json = {
+        "touser": send_user,
+        "msgtype": "textcard",
+        "agentid": __agent_id,
+        "textcard": {
+            "title" : title,
+            "description": description,
+            "url" : host
+        }
+    }
+    headers = {'content-type': 'charset=utf8'}
+    try:
+        res = requests.post(message_url, json=req_json, headers=headers)
+        if res:
+            ret_json = res.json()
+            if ret_json['errcode'] == 0:
+                return True, ret_json['errmsg']
+            else:
+                return False, ret_json['errmsg']
+        else:
+            return False, None
+    except Exception as err:
+        return False, str(err)
+
 # 删除文件不存在种子
 for torrent in client.torrents_info():
     if torrent.state == 'missingFiles':
@@ -288,9 +326,15 @@ if torrent.category in CATEGORY_TV:
     client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
     if tmdb_title:
         send_image_message('%s(%s) %s' % (tmdb_title, tmdb_year, tmdb_genre), '第 %s 季，第 %s 集\n评分：%s %s\n%s' % (season, episode, num, vote_average, res.overview), tmdb_image_url, tmdb_url)
+    else:
+        current_date = datetime.datetime.now().strftime('%Y年%m月%d日')
+        send_textcard_message('下载完成通知', '%s\n%s\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理' % (current_date, media_info_title))
 else:
     if tmdb_title:
         send_image_message('%s(%s) %s' % (tmdb_title, tmdb_year, tmdb_genre), '评分：%s %s\n%s' % (num, vote_average, res.overview), tmdb_image_url, tmdb_url)
+    else:
+        current_date = datetime.datetime.now().strftime('%Y年%m月%d日')
+        send_textcard_message('下载完成通知', '%s\n%s\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理' % (current_date, media_info_title))
     for torrent_file in torrent.files:
         oldPath = torrent_file.name.splitlines()[0]
         path = oldPath
