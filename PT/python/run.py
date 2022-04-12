@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # -*-coding:utf-8 -*-
-from ast import If
 from qbittorrentapi import Client
-import re
-import sys
-import time
-import requests
-import json
+import json,requests,time,sys,re
 from common import parse
 from tmdbv3api import TMDb, Search
 tmdb = TMDb()
@@ -52,7 +47,7 @@ def print_log(log_file, txt):
     print(txt)
     txt = '%s\t%s\n' % (time.strftime('%Y/%m/%d %H:%M:%S',
                         time.localtime(time.time())), str(txt))
-    f = open(log_file, "a", encoding='utf-8')
+    f = open(log_file, "a+", encoding='utf-8')
     f.write(txt)
     f.close()
 
@@ -209,6 +204,16 @@ tmdb_title = None
 tmdb_genre = None
 tmdb_year = None
 
+# 检测 api.themoviedb.org 连接性
+try:
+    html = requests.get('https://api.themoviedb.org', timeout=5).text
+    print_log(logfile, f'success: 连接 api.themoviedb.org 成功')
+except requests.exceptions.RequestException as e:
+    print_log(logfile, f'error: 连接 api.themoviedb.org 超时，请检测网络后重试')
+    send_text_message('种子名：%s\n连接 api.themoviedb.org 超时，请检测网络后重试' % (torrent.name))
+    exit()
+
+
 if torrent.category in CATEGORY_MOVIE:
     if media_info_year is not None:
         search = Search().movies({"query": media_info_title, "year": media_info_year})
@@ -344,4 +349,3 @@ else:
         client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
         break
 logcut(logfile, 1000) # 仅保留 1000 行日志
-
