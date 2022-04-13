@@ -59,9 +59,6 @@ def logcut(log_file, num):
         with open(log_file, encoding='utf-8') as f:
             lines = f.readlines()
 
-        def remove_comments(lines):
-            return [line for line in lines if line.startswith("#") == False]
-
         def remove_n_line(lines, n):
             return lines[n if n<= len(lines) else 0:]
 
@@ -312,7 +309,11 @@ if torrent.category in CATEGORY_TV:
             path = re.sub(r'ep?([0-9]{1,2})', 'S01E\g<1>', oldPath, flags=re.I)
         else:
             path = oldPath
-        newPath = year(path)
+        if not re.search(r'\D\(\d{4}\)\D', oldPath, flags=re.I): # 如果名字有类似 (2022) 的，跳过处理
+            newPath = year(oldPath)
+        else:
+            print_log(logfile, f'oldPath 有(年份)，跳过处理')
+            newPath = oldPath
         client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
 
         print_log(logfile, f'oldPath: {oldPath}')
@@ -338,8 +339,11 @@ else:
         send_text_message('<a href=\"%s\">%s</a>\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理。' % (host, media_info_title))
     for torrent_file in torrent.files:
         oldPath = torrent_file.name.splitlines()[0]
-        path = oldPath
-        newPath = year(path)
+        if not re.search(r'\D\(\d{4}\)\D', oldPath, flags=re.I): # 如果名字有类似 (2022) 的，跳过处理
+            newPath = year(oldPath)
+        else:
+            print_log(logfile, f'oldPath 有(年份)，跳过处理')
+            newPath = oldPath
         oldPath = oldPath.split("/", 1)[0]
         newPath = newPath.split("/", 1)[0]
         client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
@@ -349,3 +353,4 @@ else:
         client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
         break
 logcut(logfile, 1000) # 仅保留 1000 行日志
+
