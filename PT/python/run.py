@@ -71,18 +71,33 @@ def logcut(log_file, num):
 
 def year(path):
     root_path = path.split("/", 1)
-    if tmdb_title:
-        newPath = f'{tmdb_title}({tmdb_year})-{root_path[0]}/{root_path[1]}'
-    else:
-        if parse(root_path[0]).get('year'):
-            if parse(root_path[0]).get('zhTitle'):
-                title = parse(root_path[0]).get('zhTitle')
-            else:
-                title = parse(root_path[0]).get('enTitle')
-            years = parse(root_path[0]).get('year')
-            newPath = f'{title}({years})-{root_path[0]}/{root_path[1]}'
-        else:
+    check = re.search(r'([\u4E00-\u9FA5A-Za-z0-9_]+)\((\d{4})\)\D', root_path[0]) # 检测有无 (年份)
+    if check:
+        check_name = check.group(1)
+        check_year = check.group(2)
+        if re.search(r'[\u4E00-\u9FA5]', check_name):
+            print_log(logfile, f'名字是 汉字(年份)，跳过重命名')
             newPath = path
+        else:
+            if tmdb_title:
+                s = root_path[0].replace(check_name, tmdb_title, 1)
+                s = s.replace(check_year, tmdb_year, 1)
+                newPath = f'{s}/{root_path[1]}'
+            else:
+                newPath = path
+    else:
+        if tmdb_title:
+            newPath = f'{tmdb_title}({tmdb_year})-{root_path[0]}/{root_path[1]}'
+        else:
+            if parse(root_path[0]).get('year'):
+                if parse(root_path[0]).get('zhTitle'):
+                    title = parse(root_path[0]).get('zhTitle')
+                else:
+                    title = parse(root_path[0]).get('enTitle')
+                years = parse(root_path[0]).get('year')
+                newPath = f'{title}({years})-{root_path[0]}/{root_path[1]}'
+            else:
+                newPath = path
     return newPath
 
 # 发送图文消息
@@ -309,11 +324,7 @@ if torrent.category in CATEGORY_TV:
             path = re.sub(r'ep?([0-9]{1,2})', 'S01E\g<1>', oldPath, flags=re.I)
         else:
             path = oldPath
-        if not re.search(r'\D\(\d{4}\)\D', oldPath, flags=re.I): # 如果名字有类似 (2022) 的，跳过处理
-            newPath = year(oldPath)
-        else:
-            print_log(logfile, f'oldPath 有(年份)，跳过处理')
-            newPath = oldPath
+        newPath = year(path)
         client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
 
         print_log(logfile, f'oldPath: {oldPath}')
@@ -339,11 +350,7 @@ else:
         send_text_message('<a href=\"%s\">%s</a>\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理。' % (host, media_info_title))
     for torrent_file in torrent.files:
         oldPath = torrent_file.name.splitlines()[0]
-        if not re.search(r'\D\(\d{4}\)\D', oldPath, flags=re.I): # 如果名字有类似 (2022) 的，跳过处理
-            newPath = year(oldPath)
-        else:
-            print_log(logfile, f'oldPath 有(年份)，跳过处理')
-            newPath = oldPath
+        newPath = year(oldPath)
         oldPath = oldPath.split("/", 1)[0]
         newPath = newPath.split("/", 1)[0]
         client.torrents_rename_folder(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
