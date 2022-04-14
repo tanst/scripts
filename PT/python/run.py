@@ -71,7 +71,7 @@ def logcut(log_file, num):
 
 def year(path):
     root_path = path.split("/", 1)
-    check = re.search(r'([\u4E00-\u9FA5A-Za-z0-9_]+)\((\d{4})\)\D', root_path[0]) # 检测有无 (年份)
+    check = re.search(r'(.+)\((\d{4})\)\D', root_path[0]) # 检测有无 (年份)
     if check:
         check_name = check.group(1)
         check_year = check.group(2)
