@@ -4,6 +4,7 @@ from qbittorrentapi import Client
 import json,requests,time,sys,re
 from common import parse
 from tmdbv3api import TMDb, Search
+from requests.adapters import HTTPAdapter
 tmdb = TMDb()
 #========================================================
 # 使用说明：
@@ -217,10 +218,13 @@ tmdb_genre = None
 tmdb_year = None
 
 # 检测 api.themoviedb.org 连接性
+s = requests.Session()
+s.mount('http://',HTTPAdapter(max_retries=3))#设置重试次数为3次
+s.mount('https://',HTTPAdapter(max_retries=3))
 try:
-    html = requests.get('https://api.themoviedb.org', timeout=5).text
+    s.get('https://api.themoviedb.org',timeout=5)
     print_log(logfile, f'success: 连接 api.themoviedb.org 成功')
-except requests.exceptions.RequestException as e:
+except requests.exceptions.ConnectionError as e:
     print_log(logfile, f'error: 连接 api.themoviedb.org 超时，请检测网络后重试')
     send_text_message('种子名：%s\n连接 api.themoviedb.org 超时，请检测网络后重试' % (torrent.name))
     exit()
