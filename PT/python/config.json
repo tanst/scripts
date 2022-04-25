@@ -1,0 +1,15 @@
+{
+    "CATEGORY_MOVIE": "movie, rss_movie",
+    "CATEGORY_OTHER": "tmp",
+    "CATEGORY_TV": "TV",
+    "__agent_id": "1000000",
+    "__corpid": "ww0jdf8d0fj08ja6b2",
+    "__corpsecret": "Ini05h745h7457h457hcv0_kdASRY045h74h74h6zlns",
+    "host": "127.0.0.1:8080",
+    "logfile": "run.log",
+    "password": "adminadmin",
+    "send_user": "@all",
+    "tmdb_api_key": "07851a893juhjdf903ju4fae09c9cb3bb4b",
+    "tmdb_language": "zh",
+    "username": "admin"
+}
