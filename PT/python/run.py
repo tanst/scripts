@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*-coding:utf-8 -*-
+from ast import If
 from qbittorrentapi import Client
-import json,requests,time,sys,re
+import json,os,requests,time,sys,re
 from common import parse
 from tmdbv3api import TMDb, Search
-from requests.adapters import HTTPAdapter
 tmdb = TMDb()
 #========================================================
 # 使用说明：
@@ -17,31 +17,67 @@ tmdb = TMDb()
 # [ TV 分类]自动判断添加 S01 并自动重命名为：中文（年份）-原文件名
 # 利用 qbittorrent 下载完成时运行外部程序进行重命名方便搜刮器搜刮，不影响做种
 # 脚本放置 /config 目录下
+# 配置文件: config.json
 # qbittorrent 设置：设置-下载-Torrent 完成时运行外部程序：
 # python3 /config/run.py "%I"
 #========================================================
 
 
-#======================== 配置 ================================
-host = '127.0.0.1:8080'
-username = 'admin'
-password = 'adminadmin'
-CATEGORY_TV = ['TV'] # 添加S01分类
-CATEGORY_MOVIE = ['movie', 'rss_movie']
-CATEGORY_OTHER = ['tmp']
-logfile = r"/config/log.txt"
+#====================== 导入配置================================
+# load configuration from file
+CONFIG_FILE = 'config.json'
+CONFIG_PATH = os.path.join(os.path.dirname(
+    os.path.realpath(__file__)), CONFIG_FILE)
+CONFIG_DATA = {
+    'host' : '127.0.0.1:8080',
+    'username' : 'admin',
+    'password' : 'adminadmin',
+    'CATEGORY_TV' : 'TV', # 添加S01分类
+    'CATEGORY_MOVIE' : 'movie, rss_movie',
+    'CATEGORY_OTHER' : 'tmp',
+    'logfile' : 'run.log',
 
-# TMDB API
-tmdb.api_key = 'xxxxxxxxxxxxxxxxxxx'
-tmdb.language = 'zh'
+    # TMDB API
+    'tmdb_api_key' : '07851a893juhjdf903ju4fae09c9cb3bb4b',
+    'tmdb_language' : 'zh',
 
-# 企业微信推送
-__corpid = 'xxxxxxxx'
-__corpsecret = 'xxxxxxxxxx'
-__agent_id = '1000000'
-send_user = 'admin'
+    # 企业微信推送
+    '__corpid' : 'ww0jdf8d0fj08ja6b2',
+    '__corpsecret' : 'Ini05h745h7457h457hcv0_kdASRY045h74h74h6zlns',
+    '__agent_id' : '1000000',
+    'send_user' : '@all'
+}
 
-#====================== 配置结束 ================================
+
+def load_configuration():
+    global CONFIG_PATH, CONFIG_DATA
+    try:
+        # try to load user data from file
+        with open(CONFIG_PATH) as f:
+            CONFIG_DATA = json.load(f)
+    except Exception:
+        # if file doesn't exist, we create it
+        with open(CONFIG_PATH, 'w') as f:
+            f.write(json.dumps(CONFIG_DATA, indent=4, sort_keys=True))
+
+load_configuration()
+
+host = CONFIG_DATA['host']
+username = CONFIG_DATA['username']
+password = CONFIG_DATA['password']
+CATEGORY_TV = CONFIG_DATA['CATEGORY_TV'].split(",")
+CATEGORY_MOVIE = CONFIG_DATA['CATEGORY_MOVIE'].split(",")
+CATEGORY_OTHER = CONFIG_DATA['CATEGORY_OTHER'].split(",")
+CATEGORY_ALL = [*CATEGORY_TV, *CATEGORY_MOVIE, *CATEGORY_OTHER]
+logfile = CONFIG_DATA['logfile']
+tmdb.api_key = CONFIG_DATA['tmdb_api_key']
+tmdb.language = CONFIG_DATA['tmdb_language']
+__corpid = CONFIG_DATA['__corpid']
+__corpsecret = CONFIG_DATA['__corpsecret']
+__agent_id = CONFIG_DATA['__agent_id']
+send_user = CONFIG_DATA['send_user']
+#====================== 配置结束 ================================#
+
 
 client = Client(host=host, username=username, password=password)
 def print_log(log_file, txt): 
@@ -72,6 +108,8 @@ def logcut(log_file, num):
 
 def year(path):
     root_path = path.split("/", 1)
+    root_path[0] = re.sub(r'.mkv|.mp4|.avi|.rmvb|.rm|.mpg|.mpeg|.ts|.mov|.wmv|.m2ts', '', root_path[0])
+    root_path[0] = root_path[0].replace(' ', '.')
     check = re.search(r'(.+)\((\d{4})\)\D', root_path[0]) # 检测有无 (年份)
     if check:
         check_name = check.group(1)
@@ -188,11 +226,25 @@ for torrent in client.torrents_info():
     # print_log(logfile, f'状态：{torrent.state}\n名字：{torrent.name}\n分类：{torrent.category}')
 
 HASH = sys.argv[1]
+torrent = client.torrents.info(torrent_hashes=HASH)[0]
 
+# 检测是否存在目录，不存在自动创建
+if '/' not in str(torrent.files):
+    for torrent_file in torrent.files:
+        oldPath= torrent_file.name
+        newPath = re.sub(r'.mkv|.mp4|.avi|.rmvb|.rm|.mpg|.mpeg|.ts|.mov|.wmv|.m2ts', '', torrent.name)
+        new_torrent_name = newPath
+        newPath = f'{newPath}/{oldPath}'
+        client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
+        client.torrents_rename_file(torrent_hash=HASH, old_path=oldPath, new_path=newPath)
+        print('oldPath:', oldPath)
+        print('newPath:', newPath)
+
+# 重新获取信息
+client = Client(host=host, username=username, password=password)
 torrent = client.torrents.info(torrent_hashes=HASH)[0]
 
 # 不在分类中的退出
-CATEGORY_ALL = list(filter(None, CATEGORY_TV + CATEGORY_MOVIE + CATEGORY_OTHER))
 if torrent.category not in CATEGORY_ALL:
     print_log(logfile, f'退出。不在分类中：名字：{torrent.name} 分类：{torrent.category}')
     exit()
@@ -218,13 +270,10 @@ tmdb_genre = None
 tmdb_year = None
 
 # 检测 api.themoviedb.org 连接性
-s = requests.Session()
-s.mount('http://',HTTPAdapter(max_retries=3))#设置重试次数为3次
-s.mount('https://',HTTPAdapter(max_retries=3))
 try:
-    s.get('https://api.themoviedb.org',timeout=5)
+    html = requests.get('https://api.themoviedb.org', timeout=5).text
     print_log(logfile, f'success: 连接 api.themoviedb.org 成功')
-except requests.exceptions.ConnectionError as e:
+except requests.exceptions.RequestException as e:
     print_log(logfile, f'error: 连接 api.themoviedb.org 超时，请检测网络后重试')
     send_text_message('种子名：%s\n连接 api.themoviedb.org 超时，请检测网络后重试' % (torrent.name))
     exit()
