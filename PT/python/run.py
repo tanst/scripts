@@ -69,7 +69,7 @@ CATEGORY_TV = CONFIG_DATA['CATEGORY_TV'].split(",")
 CATEGORY_MOVIE = CONFIG_DATA['CATEGORY_MOVIE'].split(",")
 CATEGORY_OTHER = CONFIG_DATA['CATEGORY_OTHER'].split(",")
 CATEGORY_ALL = [*CATEGORY_TV, *CATEGORY_MOVIE, *CATEGORY_OTHER]
-logfile = CONFIG_DATA['logfile']
+logfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), CONFIG_DATA['logfile'])
 tmdb.api_key = CONFIG_DATA['tmdb_api_key']
 tmdb.language = CONFIG_DATA['tmdb_language']
 __corpid = CONFIG_DATA['__corpid']
@@ -413,4 +413,3 @@ else:
         client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
         break
 logcut(logfile, 1000) # 仅保留 1000 行日志
-
