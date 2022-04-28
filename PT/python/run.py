@@ -58,7 +58,7 @@ def load_configuration():
     except Exception:
         # if file doesn't exist, we create it
         with open(CONFIG_PATH, 'w') as f:
-            f.write(json.dumps(CONFIG_DATA, indent=4, sort_keys=True))
+            f.write(json.dumps(CONFIG_DATA, indent=4, sort_keys=False))
 
 load_configuration()
 
@@ -388,8 +388,12 @@ if torrent.category in CATEGORY_TV:
             episode.append(se.group(2))
         else:
             break
-    season = ','.join(map(str, list(set([ int(x) for x in season ]))))
-    episode = ','.join(map(str, list(set([ int(x) for x in episode ]))))
+    season = list(map(int,season))
+    season.sort()
+    season = ','.join(list(map(str,season)))
+    episode = list(map(int,episode))
+    episode.sort()
+    episode = ','.join(list(map(str,episode)))
     new_torrent_name = newPath.split("/", 1)[0]
     client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
     if tmdb_title:
