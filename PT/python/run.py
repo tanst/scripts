@@ -388,9 +388,11 @@ if torrent.category in CATEGORY_TV:
             episode.append(se.group(2))
         else:
             break
-    season = list(map(int,season))
+    season = list(set(season)) # 去重
+    season = list(map(int,season)) # 转换整型排序
     season.sort()
-    season = ','.join(list(map(str,season)))
+    season = ','.join(list(map(str,season))) # 转换字符格式化输出
+    episode = list(set(episode))
     episode = list(map(int,episode))
     episode.sort()
     episode = ','.join(list(map(str,episode)))
