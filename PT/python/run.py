@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*-coding:utf-8 -*-
-from ast import If
+from os.path import join, getsize
+import os
 from qbittorrentapi import Client
 import json,os,requests,time,sys,re
 from common import parse
@@ -77,8 +78,6 @@ __corpsecret = CONFIG_DATA['__corpsecret']
 __agent_id = CONFIG_DATA['__agent_id']
 send_user = CONFIG_DATA['send_user']
 #====================== 配置结束 ================================#
-
-
 client = Client(host=host, username=username, password=password)
 def print_log(log_file, txt): 
     print(txt)
@@ -224,6 +223,44 @@ for torrent in client.torrents_info():
         print_log(logfile, f'已删除：{torrent.state}:{torrent.name}[{torrent.category}]')
         client.torrents_delete(delete_files=True, torrent_hashes=torrent.hash)
     # print_log(logfile, f'状态：{torrent.state}\n名字：{torrent.name}\n分类：{torrent.category}')
+
+
+# ===================== 删除 rss_movie 多余种子 start ===================== #
+
+def hum_convert(value):
+    units = ["B", "KB", "MB", "GB", "TB", "PB"]
+    size = 1024.0
+    for i in range(len(units)):
+        if (value / size) < 1:
+            return "%.2f %s" % (value, units[i])
+        value = value / size
+        
+dir = '/666/rss_movie/'
+print_log(logfile, f'开始检测 {dir} 空间大小：')
+def getdirsize(dir):
+    size = 0
+    for root, dirs, files in os.walk(dir):
+        size += sum([getsize(join(root, name)) for name in files])
+    return size
+
+if __name__ == '__main__':
+    total_size = getdirsize(dir)
+    print_log(logfile, f'There are {hum_convert(total_size)} in {dir}')
+
+print_log(logfile, f'总大小： {hum_convert(total_size)}({total_size})')
+b = 322122547200 - total_size
+print_log(logfile, f'剩余空间：{hum_convert(322122547200 - total_size)}({322122547200 - total_size})')
+
+while total_size > 322122547200: # 300 GB
+    old_torrent_name = client.torrents_info(category='rss_movie', sort='added_on')[0].name
+    old_torrent_humsize = hum_convert(client.torrents_info(category='rss_movie', sort='added_on')[0].size)
+    old_torrent_size = client.torrents_info(category='rss_movie', sort='added_on')[0].size
+    print_log(logfile, f'存储已满，开始删除最旧种子：{old_torrent_name}[{old_torrent_humsize}]({old_torrent_size})')
+    client.torrents_delete(delete_files=True, torrent_hashes=client.torrents_info(category='rss_movie', sort='added_on')[0].hash)
+    total_size = getdirsize(dir)
+    print_log(logfile, f'删除后，总大小：{hum_convert(total_size)}({total_size})')
+print_log(logfile, f'检测 {dir} 空间大小结束')
+# ===================== 删除多余种子 end ===================== #
 
 HASH = sys.argv[1]
 torrent = client.torrents.info(torrent_hashes=HASH)[0]
@@ -388,10 +425,10 @@ if torrent.category in CATEGORY_TV:
             episode.append(se.group(2))
         else:
             break
-    season = list(set(season)) # 去重
-    season = list(map(int,season)) # 转换整型排序
+    season = list(set(season))
+    season = list(map(int,season))
     season.sort()
-    season = ','.join(list(map(str,season))) # 转换字符格式化输出
+    season = ','.join(list(map(str,season)))
     episode = list(set(episode))
     episode = list(map(int,episode))
     episode.sort()
