@@ -391,6 +391,7 @@ if torrent.category in CATEGORY_TV:
 print_log(logfile, '-------------------------------------')
 print_log(logfile, '')
 print_log(logfile, f'         种子名字：{torrent.name}')
+print_log(logfile, f'         种子大小：{hum_convert(torrent.size)}')
 print_log(logfile, f'         分类：{torrent.category}')
 if tmdb_title:
     print_log(logfile, '          ~~~~~~~~~~~~~~~~~~~~~~~~~~~')
