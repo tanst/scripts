@@ -257,6 +257,7 @@ while total_size > 322122547200: # 300 GB
     old_torrent_size = client.torrents_info(category='rss_movie', sort='added_on')[0].size
     print_log(logfile, f'存储已满，开始删除最旧种子：{old_torrent_name}[{old_torrent_humsize}]({old_torrent_size})')
     client.torrents_delete(delete_files=True, torrent_hashes=client.torrents_info(category='rss_movie', sort='added_on')[0].hash)
+    time.sleep( 30 )
     total_size = getdirsize(dir)
     print_log(logfile, f'删除后，总大小：{hum_convert(total_size)}({total_size})')
 print_log(logfile, f'检测 {dir} 空间大小结束')
