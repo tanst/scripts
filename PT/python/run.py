@@ -235,7 +235,7 @@ def hum_convert(value):
             return "%.2f %s" % (value, units[i])
         value = value / size
         
-dir = '/666/rss_movie/'
+dir = '/rss_media/movie/'
 print_log(logfile, f'开始检测 {dir} 空间大小：')
 def getdirsize(dir):
     size = 0
@@ -248,10 +248,10 @@ if __name__ == '__main__':
     print_log(logfile, f'There are {hum_convert(total_size)} in {dir}')
 
 print_log(logfile, f'总大小： {hum_convert(total_size)}({total_size})')
-b = 322122547200 - total_size
-print_log(logfile, f'剩余空间：{hum_convert(322122547200 - total_size)}({322122547200 - total_size})')
+b = 1003948605440 - total_size
+print_log(logfile, f'剩余空间：{hum_convert(1003948605440 - total_size)}({1003948605440 - total_size})')
 
-while total_size > 322122547200: # 300 GB
+while total_size > 1003948605440: # 935 GB
     old_torrent_name = client.torrents_info(category='rss_movie', sort='added_on')[0].name
     old_torrent_humsize = hum_convert(client.torrents_info(category='rss_movie', sort='added_on')[0].size)
     old_torrent_size = client.torrents_info(category='rss_movie', sort='added_on')[0].size
@@ -426,7 +426,7 @@ if torrent.category in CATEGORY_TV:
             season.append(se.group(1))
             episode.append(se.group(2))
         else:
-            break
+            continue
     season = list(set(season))
     season = list(map(int,season))
     season.sort()
@@ -457,4 +457,4 @@ else:
         new_torrent_name = newPath
         client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
         break
-logcut(logfile, 1000) # 仅保留 1000 行日志
+logcut(logfile, 100000) # 仅保留 10000 行日志
