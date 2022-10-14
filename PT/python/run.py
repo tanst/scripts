@@ -256,6 +256,7 @@ while total_size > 1003948605440: # 935 GB
     old_torrent_humsize = hum_convert(client.torrents_info(category='rss_movie', sort='added_on')[0].size)
     old_torrent_size = client.torrents_info(category='rss_movie', sort='added_on')[0].size
     print_log(logfile, f'存储已满，开始删除最旧种子：{old_torrent_name}[{old_torrent_humsize}]({old_torrent_size})')
+    send_text_message('存储已满，删除最旧种子：%s [%s](%s)' % (old_torrent_name,old_torrent_humsize,old_torrent_size))
     client.torrents_delete(delete_files=True, torrent_hashes=client.torrents_info(category='rss_movie', sort='added_on')[0].hash)
     time.sleep( 30 )
     total_size = getdirsize(dir)
