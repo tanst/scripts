@@ -5,7 +5,7 @@
 ###################################
 apt-get update -y
 apt-get install curl -y
-echo "PS1='`a=$?;if [ $a -ne 0 ]; then a="  "$a; echo -ne "\[\e[1A\e[$((COLUMNS-2))G\e[31m\e[1;41m${a:(-3)}\]\[\e[0m\e[7m\e[2m\r\n\]";fi`${debian_chroot:+($debian_chroot)}\[\e[1;33m\]\u\[\e[1;31m\]@\[\e[1;35m\]\h\[\e[1;32m\][\t]\[\e[1;31m\]:\[\e[1;36m\]\w\[\e[1;34m\]\$\[\e[0;39m\]'" >> ~/.bashrc
+echo "PS1='`a=$?;if [ $a -ne 0 ]; then a="  "$a; echo -ne "\[\e[1A\e[$((COLUMNS-2))G\e[31m\e[1;41m${a:(-3)}\]\[\e[0m\e[7m\e[2m\r\n\]";fi`${debian_chroot:+($debian_chroot)}\[\e[1;33m\]\u\[\e[1;31m\]@\[\e[1;35m\]\h\[\e[1;32m\][\t]\[\e[1;31m\]:\[\e[1;36m\]\w\[\e[1;34m\]\$\[\e[0;39m\] '" >> ~/.bashrc
 echo "alias ll='ls --color=auto -l'" >> ~/.bashrc
 echo "alias ls='ls --color=auto'" >> ~/.bashrc
 mkdir -p ~/.ssh
