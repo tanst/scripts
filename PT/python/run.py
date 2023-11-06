@@ -235,7 +235,7 @@ def hum_convert(value):
             return "%.2f %s" % (value, units[i])
         value = value / size
         
-dir = '/rss_media/movie/'
+dir = '/Medias/'
 print_log(logfile, f'开始检测 {dir} 空间大小：')
 def getdirsize(dir):
     size = 0
@@ -248,15 +248,14 @@ if __name__ == '__main__':
     print_log(logfile, f'There are {hum_convert(total_size)} in {dir}')
 
 print_log(logfile, f'总大小： {hum_convert(total_size)}({total_size})')
-b = 1003948605440 - total_size
-print_log(logfile, f'剩余空间：{hum_convert(1003948605440 - total_size)}({1003948605440 - total_size})')
+b = 10995116277760 - total_size
+print_log(logfile, f'剩余空间：{hum_convert(10995116277760 - total_size)}({10995116277760 - total_size})')
 
-while total_size > 1003948605440: # 935 GB
+while total_size > 10995116277760: # 10TB
     old_torrent_name = client.torrents_info(category='rss_movie', sort='added_on')[0].name
     old_torrent_humsize = hum_convert(client.torrents_info(category='rss_movie', sort='added_on')[0].size)
     old_torrent_size = client.torrents_info(category='rss_movie', sort='added_on')[0].size
     print_log(logfile, f'存储已满，开始删除最旧种子：{old_torrent_name}[{old_torrent_humsize}]({old_torrent_size})')
-    send_text_message('存储已满，删除最旧种子：%s [%s](%s)' % (old_torrent_name,old_torrent_humsize,old_torrent_size))
     client.torrents_delete(delete_files=True, torrent_hashes=client.torrents_info(category='rss_movie', sort='added_on')[0].hash)
     time.sleep( 30 )
     total_size = getdirsize(dir)
@@ -320,9 +319,9 @@ except requests.exceptions.RequestException as e:
 
 if torrent.category in CATEGORY_MOVIE:
     if media_info_year is not None:
-        search = Search().movies({"query": media_info_title, "year": media_info_year})
+        search = Search().movies(media_info_title, year=media_info_year)
     else:
-        search = Search().movies({"query": media_info_title})
+        search = Search().movies(media_info_title)
     if search :
         res = search[0]
         response = requests.get('https://api.themoviedb.org/3/genre/movie/list?api_key=%s&language=%s' % (tmdb.api_key, tmdb.language))
@@ -354,10 +353,7 @@ if torrent.category in CATEGORY_MOVIE:
         print_log(logfile, f'抱歉，没有在 TMDB 搜索到 "{media_info_title}" 的信息')
 
 if torrent.category in CATEGORY_TV:
-    if media_info_year is not None: 
-        search = Search().tv_shows({"query": media_info_title, "first_air_date_year": media_info_year})
-    else:
-        search = Search().tv_shows({"query": media_info_title})
+    search = Search().tv_shows(media_info_title)
     if search :
         res = search[0]
         response = requests.get('https://api.themoviedb.org/3/genre/tv/list?api_key=%s&language=%s' % (tmdb.api_key, tmdb.language))
@@ -441,12 +437,12 @@ if torrent.category in CATEGORY_TV:
     if tmdb_title:
         send_image_message('%s(%s) %s' % (tmdb_title, tmdb_year, tmdb_genre), '第 %s 季，第 %s 集\n评分：%s %s\n%s' % (season, episode, num, vote_average, res.overview), tmdb_image_url, tmdb_url)
     else:
-        send_text_message('<a href=\"%s\">%s</a>\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理。' % (host, media_info_title))
+        send_text_message('《%s》\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理。' % (media_info_title))
 else:
     if tmdb_title:
         send_image_message('%s(%s) %s' % (tmdb_title, tmdb_year, tmdb_genre), '评分：%s %s\n%s' % (num, vote_average, res.overview), tmdb_image_url, tmdb_url)
     else:
-        send_text_message('<a href=\"%s\">%s</a>\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理。' % (host, media_info_title))
+        send_text_message('《%s》\n下载完成，但是没有在 TMDB 搜索到相关的信息，请手动处理。' % (media_info_title))
     for torrent_file in torrent.files:
         oldPath = torrent_file.name.splitlines()[0]
         newPath = year(oldPath)
@@ -458,4 +454,4 @@ else:
         new_torrent_name = newPath
         client.torrents_rename(torrent_hash=HASH, new_torrent_name=new_torrent_name)
         break
-logcut(logfile, 100000) # 仅保留 10000 行日志
+logcut(logfile, 10000) # 仅保留 10000 行日志
