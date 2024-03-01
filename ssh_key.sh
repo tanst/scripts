@@ -4,7 +4,7 @@
 #    bash <(curl -Lso- https://raw.githubusercontent.com/tanst/scripts/master/ssh_key.sh)
 ###################################
 apt update -y
-ap install curl -y
+apt install curl -y
 echo "PS1='\[\e[1;33m\]\u\[\e[1;31m\]@\[\e[1;35m\]\h\[\e[1;32m\][\t]\[\e[1;31m\]:\[\e[1;36m\]\w\[\e[1;34m\]\$\[\e[0;39m\] '" >> ~/.bashrc
 echo "alias ll='ls --color=auto -l'" >> ~/.bashrc
 echo "alias ls='ls --color=auto'" >> ~/.bashrc
