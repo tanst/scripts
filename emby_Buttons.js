@@ -81,14 +81,14 @@
 
         // add event
         document.querySelector("#embyPot").onclick = embyPot;
-        document.querySelector("#embyVlc").onclick = embyVlc;
+        // document.querySelector("#embyVlc").onclick = embyVlc;
         document.querySelector("#embyIINA").onclick = embyIINA;
-        document.querySelector("#embyNPlayer").onclick = embyNPlayer;
+        // document.querySelector("#embyNPlayer").onclick = embyNPlayer;
         document.querySelector("#embyMX").onclick = embyMX;
-        document.querySelector("#embyInfuse").onclick = embyInfuse;
-        document.querySelector("#embyStellarPlayer").onclick = embyStellarPlayer;
-        document.querySelector("#embyMPV").onclick = embyMPV;
-        document.querySelector("#embyDDPlay").onclick = embyDDPlay;
+        // document.querySelector("#embyInfuse").onclick = embyInfuse;
+        // document.querySelector("#embyStellarPlayer").onclick = embyStellarPlayer;
+        // document.querySelector("#embyMPV").onclick = embyMPV;
+        // document.querySelector("#embyDDPlay").onclick = embyDDPlay;
         document.querySelector("#embyCopyUrl").onclick = embyCopyUrl;
         // no code highlight
         // buttons.forEach(button => {
