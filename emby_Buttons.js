@@ -30,14 +30,14 @@
         let mainDetailButtons = document.querySelector("div[is='emby-scroller']:not(.hide) .mainDetailButtons");
         const buttons = [
             { id: "embyPot", title: "Potplayer", iconId: "icon-PotPlayer" },
-            { id: "embyVlc", title: "VLC", iconId: "icon-VLC" },
+            // { id: "embyVlc", title: "VLC", iconId: "icon-VLC" },
             { id: "embyIINA", title: "IINA", iconId: "icon-IINA", },
-            { id: "embyNPlayer", title: "NPlayer", iconId: "icon-NPlayer" },
+            // { id: "embyNPlayer", title: "NPlayer", iconId: "icon-NPlayer" },
             { id: "embyMX", title: "MXPlayer", iconId: "icon-MXPlayer", },
-            { id: "embyInfuse", title: "Infuse", iconId: "icon-infuse", },
-            { id: "embyStellarPlayer", title: "恒星播放器", iconId: "icon-StellarPlayer", },
-            { id: "embyMPV", title: "MPV", iconId: "icon-MPV", },
-            { id: "embyDDPlay", title: "弹弹Play", iconId: "icon-DDPlay", },
+            // { id: "embyInfuse", title: "Infuse", iconId: "icon-infuse", },
+            // { id: "embyStellarPlayer", title: "恒星播放器", iconId: "icon-StellarPlayer", },
+            // { id: "embyMPV", title: "MPV", iconId: "icon-MPV", },
+            // { id: "embyDDPlay", title: "弹弹Play", iconId: "icon-DDPlay", },
             { id: "embyCopyUrl", title: "复制串流地址", iconId: "icon-Copy", }
         ];
         function generateButtonHTML({ id, title, iconId }) {
