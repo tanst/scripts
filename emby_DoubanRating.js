@@ -2,6 +2,23 @@
 
 
 document.addEventListener("DOMContentLoaded", function() {
+let logger = {
+    error: function (...args) {
+        if (config.logLevel >= 1) {
+            console.log('%cerror', 'color: yellow; font-style: italic; background-color: blue;', ...args);
+        }
+    },
+    info: function (...args) {
+        if (config.logLevel >= 2) {
+            console.log('%cinfo', 'color: yellow; font-style: italic; background-color: blue;', ...args);
+        }
+    },
+    debug: function (...args) {
+        if (config.logLevel >= 3) {
+            console.log('%cdebug', 'color: yellow; font-style: italic; background-color: blue;', ...args);
+        }
+    },
+}
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -51,59 +68,73 @@ function cleanLocalStorage() {
     console.log(`remove done, count=${count}`)
 }
 
-function getURL(url, data = null) {
-    const method = data ? 'POST' : 'GET';
-    const options = {
-        method,
-        headers: {}
-    };
-
-    if (data) {
-        options.headers['Content-Type'] = 'application/json';
-        options.body = JSON.stringify(data);
-    }
-
+function getURL_GM(url, data = null) {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open(method, url);
-
+        xhr.open(data ? 'POST' : 'GET', url, true);
         xhr.onload = function() {
             if (this.status >= 200 && this.status < 400) {
-                resolve(xhr.responseText);
+                resolve(this.responseText);
             } else {
-                reject(`Error ${method} ${url}: ${xhr.status} ${xhr.statusText}`);
+                console.error(`Error ${data ? 'POST' : 'GET'} ${url}:`, this.status, this.statusText, this.responseText);
+                resolve(); 
             }
         };
 
         xhr.onerror = function() {
-            reject(`Error fetching ${url}: ${xhr.statusText}`);
+            console.error(`Error during XMLHttpRequest to ${url}:`, this.statusText);
+            reject(new Error(`Error during XMLHttpRequest to ${url}: ${this.statusText}`));
         };
 
-        xhr.send(data);
+        xhr.send(data ? JSON.stringify(data) : null);
     });
 }
 
-async function getDoubanInfo(id) {
-
-    if(!id){
-        return;
-    }
-    const search = await getJSON_GM(`https://movie.douban.com/j/subject_suggest?q=${id}`);
-    if (search && search.length > 0 && search[0].id) {
-        const abstract = await getJSON_GM(`https://movie.douban.com/j/subject_abstract?subject_id=${search[0].id}`);
-        const average = abstract && abstract.subject && abstract.subject.rate ? abstract.subject.rate : '?';
-        const comment = abstract && abstract.subject && abstract.subject.short_comment && abstract.subject.short_comment.content;
-        return {
-            id: search[0].id,
-            comment: comment,
-            // url: `https://movie.douban.com/subject/${search[0].id}/`,
-            rating: { numRaters: '', max: 10, average },
-            title: search[0].title,
-            sub_title: search[0].sub_title,
-        };
+async function getJSON_GM(url, data = null) {
+    const res = await getURL_GM(url, data);
+    if (res) {
+        return JSON.parse(res);
     }
 }
 
+
+async function getJSON(url) {
+    try {
+        const response = await fetch(url);
+        if (response.status >= 200 && response.status < 400)
+            return await response.json();
+        console.error(`Error fetching ${url}:`, response.status, response.statusText, await response.text());
+    }
+    catch (e) {
+        console.error(`Error fetching ${url}:`, e);
+    }
+}
+
+async function getDoubanInfo(id) {
+    if (!id) {
+        return;
+    }
+    try {
+        const search = await getJSON_GM(`https://emby.028028.xyz:8/douban-proxy/j/subject_suggest?q=${id}`);
+        if (search && search.length > 0 && search[0].id) {
+            const abstract = await getJSON_GM(`https://emby.028028.xyz:8/douban-proxy/j/subject_abstract?subject_id=${search[0].id}`);
+            const average = abstract && abstract.subject && abstract.subject.rate ? abstract.subject.rate : '?';
+            const comment = abstract && abstract.subject && abstract.subject.short_comment && abstract.subject.short_comment.content;
+            const doubanId = search[0].id;
+            localStorage.setItem(id, doubanId); // 同步操作
+            return {
+                id: doubanId,
+                comment: comment,
+                rating: { numRaters: '', max: 10, average },
+                title: search[0].title,
+                sub_title: search[0].sub_title,
+            };
+        }
+    } catch (error) {
+        console.error('Error fetching Douban info:', error);
+        // 如果需要，可以在这里处理错误
+    }
+}
 
 function insertDoubanScore(doubanId, rating) {
     rating = rating || localStorage.getItem(doubanId);
@@ -148,7 +179,11 @@ async function insertDoubanMain(linkZone) {
         });
         var doubanId = localStorage.getItem(imdbId);
     }
-    console.log('%c%o%s', "color:orange;", 'douban id ', doubanId, String(imdbId));
+    console.log('%c%s', "color:orange;", `douban id: ${doubanId} , imdb id: ${imdbId}`);
+    if (doubanId === null || doubanId === undefined || doubanId === '') {
+        console.error(`Invalid doubanId: ${doubanId}`);
+        return;
+    }
     if (!doubanId) {
         localStorage.setItem(imdbId, '');
         return;
@@ -159,32 +194,7 @@ async function insertDoubanMain(linkZone) {
     insertDoubanScore(doubanId);
 }
 
-function insertBangumiByPath(idNode) {
-    let el = getVisibleElement(document.querySelectorAll('a#bangumibutton'));
-    if (el) { return; }
-    let id = idNode.textContent.match(/(?<=bgm\=)\d+/);
-    let bgmHtml = `<a id="bangumibutton" is="emby-linkbutton" class="raised item-tag-button nobackdropfilter emby-button" href="https://bgm.tv/subject/${id}" target="_blank"><i class="md-icon button-icon button-icon-left">link</i>Bangumi</a>`
-    idNode.insertAdjacentHTML('beforebegin', bgmHtml);
-}
 
-function insertBangumiScore(bgmObj, infoTable, linkZone) {
-    if (!bgmObj) return;
-    let bgmRate = infoTable.querySelector('a#bgmScore');
-    if (bgmRate) return;
-
-    let yearDiv = infoTable.querySelector('div[class="mediaInfoItem"]');
-    if (yearDiv && bgmObj.trust) {
-        let bgmIco = `<img style="width:16px;margin-right:3px;" src="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALJu+f//////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsm75ELJu+cCybvn/sm75/7Ju+f+ybvn//////7Ju+f+ybvn/sm75/7Ju+f+ybvn/sm75/7Ju+f+ybvnAsm75ELJu+cCybvn/sm75/7Ju+f+ybvn/sm75////////////sm75/7Ju+f+ybvn/sm75/7Ju+f+ybvn/sm75/7Ju+cCwaPn/sGj5/9iz/P///////////////////////////////////////////////////////////9iz/P+waPn/rF/6/6xf+v//////////////////////////////////////////////////////////////////////rF/6/6lW+/+pVvv/////////////////////////////////zXn2/////////////////////////////////6lW+/+lTfz/pU38///////Nefb/zXn2/8159v//////zXn2///////Nefb//////8159v/Nefb/zXn2//////+lTfz/okT8/6JE/P//////////////////////2bb8/8159v/Nefb/zXn2/9m2/P//////////////////////okT8/546/f+eOv3//////8159v/Nefb/zXn2////////////////////////////zXn2/8159v/Nefb//////546/f+bMf7/mzH+//////////////////////////////////////////////////////////////////////+bMf7/lyj+wJco/v/Mk/7////////////////////////////////////////////////////////////Mk///lyj+wJQf/xCUH//AlB///5Qf//+UH///lB///5Qf//+aP///mj///5o///+UH///lB///5Qf//+UH///lB//wJQf/xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzXn2/5o////Nefb/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzXn2/wAAAAAAAAAAAAAAAM159v8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzXn2/wAAAAAAAAAAAAAAAAAAAAAAAAAAzXn2/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzXn2/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADNefb/AAAAAAAAAAAAAAAA+f8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/j8AAP3fAAD77wAA9/cAAA==">`
-        yearDiv.insertAdjacentHTML('beforebegin', `<div class="starRatingContainer mediaInfoItem">${bgmIco}<a id="bgmScore" class="button-link button-link-color-inherit emby-button" is="emby-linkbutton" style="font-weight:inherit;" href="https://bgm.tv/subject/${bgmObj.id}" target="_blank">${bgmObj.score}</a></div>`);
-        console.log('%c%s', 'color: orange;', 'insert bgmScore ', bgmObj.score);
-    }
-    let tmdbButton = linkZone.querySelector('a[href^="https://www.themovie"]');
-    let bgmButton = linkZone.querySelector('a[href^="https://bgm.tv"]');
-    if (bgmButton) return;
-    let buttonClass = tmdbButton.className;
-    let bgmString = `<a is="emby-linkbutton" class="${buttonClass}" href="https://bgm.tv/subject/${bgmObj.id}" target="_blank"><i class="md-icon button-icon button-icon-left">link</i>Bangumi</a>`;
-    tmdbButton.insertAdjacentHTML('beforebegin', bgmString);
-}
 
 function textSimilarity(text1, text2) {
     const len1 = text1.length;
@@ -211,131 +221,6 @@ function checkIsExpire(key, expireDay = 1) {
         return false;
     }
 
-}
-
-async function insertBangumiMain(infoTable, linkZone) {
-    if (!infoTable || !linkZone) return;
-    let mediaInfoItems = infoTable.querySelectorAll('div[class="mediaInfoItem"] > a');
-    let isAnime = 0;
-    mediaInfoItems.forEach(tagItem => {
-        if (tagItem.textContent && tagItem.textContent.search(/动画|Anim/) != -1) { isAnime++ }
-    });
-    if (isAnime == 0) {
-        if (mediaInfoItems.length > 2) return;
-        let itemGenres = getVisibleElement(document.querySelectorAll('div[class*="itemGenres"]'));
-        if (!itemGenres) return;
-        itemGenres = itemGenres.querySelectorAll('a')
-        itemGenres.forEach(tagItem => {
-            if (tagItem.textContent && tagItem.textContent.search(/动画|Anim/) != -1) { isAnime++ }
-        });
-        if (isAnime == 0) return;
-    };
-
-    let bgmRate = infoTable.querySelector('a#bgmScore');
-    if (bgmRate) return;
-
-    let tmdbButton = linkZone.querySelector('a[href^="https://www.themovie"]');
-    if (!tmdbButton) return;
-    let tmdbId = tmdbButton.href.match(/...\d+/);
-
-    let tmdbExpireKey = tmdbId + 'expire'
-    let year = infoTable.querySelector('div[class="mediaInfoItem"]').textContent.match(/^\d{4}/);
-    let expireDay = (Number(year) < new Date().getFullYear() && new Date().getMonth() + 1 != 1) ? 30 : 3
-    let needUpdate = false;
-    if (tmdbExpireKey in localStorage) {
-        if (checkIsExpire(tmdbExpireKey, expireDay)) {
-            needUpdate = true;
-            localStorage.setItem(tmdbExpireKey, JSON.stringify(Date.now()));
-        }
-    } else {
-        localStorage.setItem(tmdbExpireKey, JSON.stringify(Date.now()));
-    }
-
-
-    let tmdbBgmKey = tmdbId + 'bgm';
-    let bgmObj = localStorage.getItem(tmdbBgmKey);
-    if (bgmObj && !needUpdate) {
-        bgmObj = JSON.parse(bgmObj)
-        insertBangumiScore(bgmObj, infoTable, linkZone);
-        return;
-    }
-
-    let tmdbNotBgmKey = tmdbId + 'NotBgm';
-    if (!checkIsExpire(tmdbNotBgmKey)) {
-        return;
-    }
-    let userId = ApiClient._serverInfo.UserId;
-    let itemId = /\?id=(\d*)/.exec(window.location.hash)[1];
-    let itemInfo = await ApiClient.getItems(userId, {
-        'Ids': itemId,
-        'Fields': 'OriginalTitle,PremiereDate'
-    })
-    itemInfo = itemInfo['Items'][0]
-    let title = itemInfo.Name;
-    let originalTitle = itemInfo.OriginalTitle;
-
-    let splitRe = /[／\/]/;
-    if (splitRe.test(originalTitle)) { //纸片人
-        logger.info(originalTitle);
-        let zprTitle = originalTitle.split(splitRe);
-        for (let _i in zprTitle) {
-            let _t = zprTitle[_i];
-            if (/[あいうえおかきくけこさしすせそたちつてとなにぬねのひふへほまみむめもやゆよらりるれろわをんー]/.test(_t)) {
-                originalTitle = _t;
-                break
-            } else {
-                originalTitle = zprTitle[0];
-            }
-        }
-    }
-
-    let premiereDate = new Date(itemInfo.PremiereDate);
-    premiereDate.setDate(premiereDate.getDate() - 2);
-    let startDate = premiereDate.toISOString().slice(0, 10);
-    premiereDate.setDate(premiereDate.getDate() + 4);
-    let endDate = premiereDate.toISOString().slice(0, 10);
-
-    logger.info('bgm ->', originalTitle, startDate, endDate);
-    let bgmInfo = await getJSON_GM(`https://api.bgm.tv/v0/search/subjects?limit=10`, JSON.stringify({
-        "keyword": originalTitle,
-        // "keyword": 'titletitletitletitletitletitletitle',
-        "filter": {
-            "type": [
-                2
-            ],
-            "air_date": [
-                `>=${startDate}`,
-                `<${endDate}`
-            ],
-            "nsfw": true
-        }
-    }))
-    logger.info('bgmInfo', bgmInfo['data'])
-    bgmInfo = (bgmInfo['data']) ? bgmInfo['data'][0] : null;
-    if (!bgmInfo) {
-        localStorage.setItem(tmdbNotBgmKey, JSON.stringify(Date.now()));
-        logger.error('getJSON_GM not bgmInfo return');
-        return;
-    };
-
-    let trust = false;
-    if (textSimilarity(originalTitle, bgmInfo['name']) < 0.4 && (textSimilarity(title, bgmInfo['name_cn'])) < 0.4
-        && (textSimilarity(title, bgmInfo['name'])) < 0.4) {
-        localStorage.setItem(tmdbNotBgmKey, JSON.stringify(Date.now()));
-        logger.error('not bgmObj and title not Similarity, skip');
-    } else {
-        trust = true
-    }
-    logger.info(bgmInfo)
-    bgmObj = {
-        id: bgmInfo['id'],
-        score: bgmInfo['score'],
-        name: bgmInfo['name'],
-        name_cn: bgmInfo['name_cn'],
-        trust: trust,
-    }
-    localStorage.setItem(tmdbBgmKey, JSON.stringify(bgmObj));
-    insertBangumiScore(bgmObj, infoTable, linkZone);
 }
 
 function cleanDoubanError() {
@@ -370,10 +255,8 @@ async function main() {
     if (infoTable && linkZone) {
         if (!infoTable.querySelector('h3.itemName-secondary')) { // not eps page
             insertDoubanMain(linkZone);
-            await insertBangumiMain(infoTable, linkZone)
         } else {
             let bgmIdNode = document.evaluate('//div[contains(text(), "[bgm=")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-            if (bgmIdNode) { insertBangumiByPath(bgmIdNode) };
         }
     }
     if (runLimit > 50) {
