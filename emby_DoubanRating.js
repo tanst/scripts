@@ -115,9 +115,9 @@ async function getDoubanInfo(id) {
         return;
     }
     try {
-        const search = await getJSON_GM(`https://emby.028028.xyz:8/douban-proxy/j/subject_suggest?q=${id}`);
+        const search = await getJSON_GM(`/douban-proxy/j/subject_suggest?q=${id}`);
         if (search && search.length > 0 && search[0].id) {
-            const abstract = await getJSON_GM(`https://emby.028028.xyz:8/douban-proxy/j/subject_abstract?subject_id=${search[0].id}`);
+            const abstract = await getJSON_GM(`/douban-proxy/j/subject_abstract?subject_id=${search[0].id}`);
             const average = abstract && abstract.subject && abstract.subject.rate ? abstract.subject.rate : '?';
             const comment = abstract && abstract.subject && abstract.subject.short_comment && abstract.subject.short_comment.content;
             const doubanId = search[0].id;
@@ -189,7 +189,7 @@ async function insertDoubanMain(linkZone) {
         return;
     }
     let buttonClass = imdbButton.className;
-    let doubanString = `<a is="emby-linkbutton" class="${buttonClass}" href="https://movie.douban.com/subject/${doubanId}/" target="_blank"><i class="md-icon button-icon button-icon-left">link</i>Douban</a>`;
+    let doubanString = `<a is="emby-linkbutton" class="${buttonClass}" href="https://movie.douban.com/subject/${doubanId}/" target="_blank">Douban,</a>`;
     imdbButton.insertAdjacentHTML('beforebegin', doubanString);
     insertDoubanScore(doubanId);
 }
