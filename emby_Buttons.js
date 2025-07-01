@@ -55,14 +55,46 @@
         isOthers: () => Object.entries(OS).filter(([key, val]) => key !== 'isOthers').every(([key, val]) => !val()),
     };
     const playBtns = [
-    { id: "embyPot", title: "Potplayer", iconId: "icon-PotPlayer", onClick: embyPot, osCheck: [OS.isWindows], },
-    { id: "embyIINA", title: "IINA", iconId: "icon-IINA", onClick: embyIINA, osCheck: [OS.isMacOS], },
-    { id: "embyMX", title: "MXPlayer", iconId: "icon-MXPlayer", onClick: embyMX, osCheck: [OS.isAndroid], },
-    { id: "embyCopyUrl", title: "复制串流地址", iconId: "icon-Copy", onClick: embyCopyUrl, },
+        { id: "embyPot", title: "Potplayer", iconId: "icon-PotPlayer"
+            , onClick: embyPot, osCheck: [OS.isWindows], },
+        { id: "embyVlc", title: "VLC", iconId: "icon-VLC", onClick: embyVlc, },
+        { id: "embyIINA", title: "IINA", iconId: "icon-IINA"
+            , onClick: embyIINA, osCheck: [OS.isMacOS], },
+        { id: "embyNPlayer", title: "NPlayer", iconId: "icon-NPlayer", onClick: embyNPlayer, },
+        { id: "embyMX", title: "MXPlayer", iconId: "icon-MXPlayer"
+            , onClick: embyMX, osCheck: [OS.isAndroid], },
+        { id: "embyMXPro", title: "MXPlayerPro", iconId: "icon-MXPlayerPro"
+            , onClick: embyMXPro, osCheck: [OS.isAndroid], },
+        { id: "embyInfuse", title: "Infuse", iconId: "icon-infuse"
+            , onClick: embyInfuse, osCheck: [OS.isApple], },
+        { id: "embyStellarPlayer", title: "恒星播放器", iconId: "icon-StellarPlayer"
+            , onClick: embyStellarPlayer, osCheck: [OS.isWindows, OS.isMacOS, OS.isAndroid], },
+        { id: "embyMPV", title: "MPV", iconId: "icon-MPV", onClick: embyMPV, },
+        { id: "embyDDPlay", title: "弹弹Play", iconId: "icon-DDPlay"
+            , onClick: embyDDPlay, osCheck: [OS.isWindows, OS.isAndroid], },
+        { id: "embyFileball", title: "Fileball", iconId: "icon-Fileball"
+            , onClick: embyFileball, osCheck: [OS.isApple], },
+        { id: "embyOmniPlayer", title: "OmniPlayer", iconId: "icon-OmniPlayer"
+            , onClick: embyOmniPlayer, osCheck: [OS.isMacOS], },
+        { id: "embyFigPlayer", title: "FigPlayer", iconId: "icon-FigPlayer"
+            , onClick: embyFigPlayer, osCheck: [OS.isMacOS], },
+        { id: "embySenPlayer", title: "SenPlayer", iconId: "icon-SenPlayer"
+            , onClick: embySenPlayer, osCheck: [OS.isIOS], },
+        { id: "embyCopyUrl", title: "复制串流地址", iconId: "icon-Copy", onClick: embyCopyUrl, },
     ];
     // Jellyfin Icons: https://marella.github.io/material-icons/demo
     // Emby Icons: https://fonts.google.com/icons
-
+    const customBtns = [
+        { id: "hideByOS", title: "异构播放器", iconName: "more", onClick: hideByOSHandler, },
+        { id: "iconOnly", title: "显示模式", iconName: "open_in_full", onClick: iconOnlyHandler, },
+        { id: "notCurrentPot", title: "多开Potplayer", iconName: "window", onClick: notCurrentPotHandler, },
+        { id: "strmDirect", title: "STRM直通", desc: "AList注意关sign,否则不要开启此选项,任然由服务端处理sign"
+            , iconName: "link", onClick: strmDirectHandler,
+        },
+    ];
+    if (!iconConfig.removeCustomBtns) {
+        playBtns.push(...customBtns);
+    }
     const fileNameReg = /.*[\\/]|(\?.*)?$/g;
     const selectors = {
         // 详情页评分,上映日期信息栏
