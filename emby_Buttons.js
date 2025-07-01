@@ -20,8 +20,8 @@
     const iconConfig = {
         // 图标来源,以下三选一,注释为只留一个,3 的优先级最高
         // 1.add icons from jsdelivr, network
-        // baseUrl: "https://emby-external-url.7o7o.cc/embyWebAddExternalUrl/icons",
-        baseUrl: "https://fastly.jsdelivr.net/gh/bpking1/embyExternalUrl@main/embyWebAddExternalUrl/icons",
+        baseUrl: "https://emby-external-url.7o7o.cc/embyWebAddExternalUrl/icons",
+        // baseUrl: "https://fastly.jsdelivr.net/gh/bpking1/embyExternalUrl@main/embyWebAddExternalUrl/icons",
         // 2.server local icons, same as /emby-server/system/dashboard-ui/icons
         // baseUrl: "icons",
         // 3.add icons from Base64, script inner, this script size 22.5KB to 74KB,
@@ -55,15 +55,10 @@
         isOthers: () => Object.entries(OS).filter(([key, val]) => key !== 'isOthers').every(([key, val]) => !val()),
     };
     const playBtns = [
-        { id: "embyPot", title: "Potplayer", iconId: "icon-PotPlayer"
-            , onClick: embyPot, osCheck: [OS.isWindows], },
-        { id: "embyIINA", title: "IINA", iconId: "icon-IINA"
-            , onClick: embyIINA, osCheck: [OS.isMacOS], },
-        { id: "embyMX", title: "MXPlayer", iconId: "icon-MXPlayer"
-            , onClick: embyMX, osCheck: [OS.isAndroid], },
-        { id: "embyMXPro", title: "MXPlayerPro", iconId: "icon-MXPlayerPro"
-            , onClick: embyMXPro, osCheck: [OS.isAndroid], },
-        { id: "embyCopyUrl", title: "复制串流地址", iconId: "icon-Copy", onClick: embyCopyUrl, },
+    { id: "embyPot", title: "Potplayer", iconId: "icon-PotPlayer", onClick: embyPot, osCheck: [OS.isWindows], },
+    { id: "embyIINA", title: "IINA", iconId: "icon-IINA", onClick: embyIINA, osCheck: [OS.isMacOS], },
+    { id: "embyMX", title: "MXPlayer", iconId: "icon-MXPlayer", onClick: embyMX, osCheck: [OS.isAndroid], },
+    { id: "embyCopyUrl", title: "复制串流地址", iconId: "icon-Copy", onClick: embyCopyUrl, },
     ];
     // Jellyfin Icons: https://marella.github.io/material-icons/demo
     // Emby Icons: https://fonts.google.com/icons
