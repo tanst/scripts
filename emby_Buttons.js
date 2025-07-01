@@ -62,17 +62,7 @@
     ];
     // Jellyfin Icons: https://marella.github.io/material-icons/demo
     // Emby Icons: https://fonts.google.com/icons
-    const customBtns = [
-        { id: "hideByOS", title: "异构播放器", iconName: "more", onClick: hideByOSHandler, },
-        { id: "iconOnly", title: "显示模式", iconName: "open_in_full", onClick: iconOnlyHandler, },
-        { id: "notCurrentPot", title: "多开Potplayer", iconName: "window", onClick: notCurrentPotHandler, },
-        { id: "strmDirect", title: "STRM直通", desc: "AList注意关sign,否则不要开启此选项,任然由服务端处理sign"
-            , iconName: "link", onClick: strmDirectHandler,
-        },
-    ];
-    if (!iconConfig.removeCustomBtns) {
-        playBtns.push(...customBtns);
-    }
+
     const fileNameReg = /.*[\\/]|(\?.*)?$/g;
     const selectors = {
         // 详情页评分,上映日期信息栏
