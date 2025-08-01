@@ -16,18 +16,18 @@
   // 查询豆瓣评分
   async function fetchDoubanScore(title) {
     try {
-      const suggestUrl = `https://movie.douban.com/j/subject_suggest?q=${encodeURIComponent(title)}`;
+      const suggestUrl = `/douban-proxy/j/subject_suggest?q=${encodeURIComponent(title)}`;
       const suggestRes = await fetch(suggestUrl);
       if (!suggestRes.ok) return null;
       const suggestArr = await suggestRes.json();
       if (!suggestArr.length) return null;
       const info = suggestArr[0];
-      const absUrl = `https://movie.douban.com/j/subject_abstract?subject_id=${info.id}`;
+      const absUrl = `/douban-proxy/j/subject_abstract?subject_id=${info.id}`;
       const absRes = await fetch(absUrl);
       if (!absRes.ok) return null;
       const absJson = await absRes.json();
       const rate = absJson?.subject?.rate || '?';
-      const link = `https://movie.douban.com/subject/${info.id}/`;
+      const link = `/douban-proxy/subject/${info.id}/`;
       return { rate, link, title: info.title };
     } catch (e) {
       return null;
