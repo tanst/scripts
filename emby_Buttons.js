@@ -27,7 +27,7 @@
         // 3.add icons from Base64, script inner, this script size 22.5KB to 74KB,
         // 自行复制 ./iconsExt.js 内容到此脚本的 getIconsExt 中
         // 移除最后几个冗余的自定义开关
-        removeCustomBtns: false,
+        removeCustomBtns: true,
     };
     // 启用后将修改直接串流链接为真实文件名,方便第三方播放器友好显示和匹配,
     // 默认不启用,强依赖 nginx-emby2Alist location two rewrite,如发现原始链接播放失败,请关闭此选项
@@ -67,19 +67,6 @@
             , onClick: embyMXPro, osCheck: [OS.isAndroid], },
         { id: "embyInfuse", title: "Infuse", iconId: "icon-infuse"
             , onClick: embyInfuse, osCheck: [OS.isApple], },
-        { id: "embyStellarPlayer", title: "恒星播放器", iconId: "icon-StellarPlayer"
-            , onClick: embyStellarPlayer, osCheck: [OS.isWindows, OS.isMacOS, OS.isAndroid], },
-        { id: "embyMPV", title: "MPV", iconId: "icon-MPV", onClick: embyMPV, },
-        { id: "embyDDPlay", title: "弹弹Play", iconId: "icon-DDPlay"
-            , onClick: embyDDPlay, osCheck: [OS.isWindows, OS.isAndroid], },
-        { id: "embyFileball", title: "Fileball", iconId: "icon-Fileball"
-            , onClick: embyFileball, osCheck: [OS.isApple], },
-        { id: "embyOmniPlayer", title: "OmniPlayer", iconId: "icon-OmniPlayer"
-            , onClick: embyOmniPlayer, osCheck: [OS.isMacOS], },
-        { id: "embyFigPlayer", title: "FigPlayer", iconId: "icon-FigPlayer"
-            , onClick: embyFigPlayer, osCheck: [OS.isMacOS], },
-        { id: "embySenPlayer", title: "SenPlayer", iconId: "icon-SenPlayer"
-            , onClick: embySenPlayer, osCheck: [OS.isIOS], },
         { id: "embyCopyUrl", title: "复制串流地址", iconId: "icon-Copy", onClick: embyCopyUrl, },
     ];
     // Jellyfin Icons: https://marella.github.io/material-icons/demo
